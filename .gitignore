@@ -1,2 +1,4 @@
 nimcache/
 vendor/
+tests/test_identity
+tests/test_protocol
