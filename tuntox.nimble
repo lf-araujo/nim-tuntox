@@ -8,5 +8,7 @@ srcDir        = "src"
 # Dependencies
 requires "nim >= 2.0"
 
-before install:
-  exec "PKG_CONFIG_PATH=" & getenv("HOME") & "/.local/lib64/pkgconfig nim c -r tests/test_identity.nim"
+task test, "Run the test suite":
+  for f in listFiles("tests"):
+    if f.endsWith(".nim") and f.startsWith("tests/test_"):
+      exec "nim c -r --path:src --hints:off " & f

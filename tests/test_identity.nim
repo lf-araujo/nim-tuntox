@@ -1,7 +1,7 @@
 ## Identity persistence: the same savedata must yield the same Tox ID,
 ## and a fresh instance must yield a different one.
 
-import std/[os, unittest]
+import std/[os, sequtils, unittest]
 import tuntox/tox
 
 let stateFile = getTempDir() / "nim_tuntox_identity_test.bin"
@@ -21,7 +21,7 @@ suite "identity":
     if fileExists(stateFile): removeFile(stateFile)
     let (id1, data) = runTox(@[])
     writeFile(stateFile, data)
-    let (id2, _) = runTox(readFile(stateFile).toSeq)
+    let (id2, _) = runTox(cast[seq[byte]](readFile(stateFile)))
     check id1 == id2
 
   test "different savedata, different ID":

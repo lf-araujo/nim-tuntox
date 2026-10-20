@@ -5,7 +5,7 @@
 ## self connection / lossless packets). Nim owns the lifetime: the last
 ## reference drop runs tox_kill via the destructor — no manual free.
 
-import std/[strutils, os]
+import std/strutils
 import tox_raw
 
 export tox_raw.TOX_ADDRESS_SIZE, tox_raw.TOX_PUBLIC_KEY_SIZE
@@ -13,7 +13,7 @@ export tox_raw.TOX_ADDRESS_SIZE, tox_raw.TOX_PUBLIC_KEY_SIZE
 type
   ToxError* = object of CatchableError
 
-  ToxInstance* = ref object
+  ToxObj = object
     raw: ptr Tox
     ## Callbacks are plain Nim closures; the cdecl trampolines below
     ## recover the instance from user_data and forward to them.
@@ -21,11 +21,18 @@ type
     onFriendConnection*: proc (friendNumber: uint32; connected: bool) {.gcsafe.}
     onSelfConnection*: proc (connected: bool) {.gcsafe.}
     onLosslessPacket*: proc (friendNumber: uint32; data: seq[byte]) {.gcsafe.}
+  ToxInstance* = ref ToxObj
 
-proc `=destroy`(t: var ToxInstance) =
-  if t != nil and t[].raw != nil:
-    tox_kill(t[].raw)
-    t[].raw = nil
+proc `=destroy`(t: ToxObj) =
+  if t.raw != nil:
+    tox_kill(t.raw)
+
+func hex(b: openArray[uint8]): string =
+  const digits = "0123456789ABCDEF"
+  result = newString(b.len * 2)
+  for i, c in b:
+    result[i * 2] = digits[c shr 4]
+    result[i * 2 + 1] = digits[c and 0xf]
 
 proc checkErr(ok: bool; e: var int32; what: string) =
   if not ok:
@@ -58,8 +65,9 @@ proc newTox*(savedata: seq[byte] = @[]): ToxInstance =
           msg: ptr uint8; len: csize_t; ud: pointer) {.cdecl.} =
       let self = cast[ToxInstance](ud)
       if self != nil and self.onFriendRequest != nil:
-        self.onFriendRequest(pk.toHex,
-          if len > 0: string(cast[cstring](msg)][0 ..< len.int]) else: "")
+        var m = newString(len)
+        if len > 0: copyMem(addr m[0], msg, len)
+        self.onFriendRequest(hex(pk), m)
   )
   tox_callback_friend_connection_status(raw,
     proc (t: ptr Tox; friend: Tox_Friend_Number; status: Tox_Connection;
@@ -88,7 +96,7 @@ proc address*(t: ToxInstance): string =
   ## The Tox ID (address) as 76 hex chars.
   var buf: array[TOX_ADDRESS_SIZE, uint8]
   tox_self_get_address(t.raw, buf)
-  buf.toHex
+  hex(buf)
 
 proc savedata*(t: ToxInstance): seq[byte] =
   ## The state blob to persist for identity continuity.

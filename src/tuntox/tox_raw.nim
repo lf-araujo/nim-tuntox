@@ -1,10 +1,14 @@
 ## c2nim-generated raw binding to libtoxcore (tox.h, c-toxcore v0.2.19).
 ## Mechanical translation; the curated API lives in tox.nim.
 {.passC: staticExec("pkg-config --cflags toxcore").}
-{.passL: staticExec("pkg-config --libs toxcore").}
+## tox.h const-qualifies callback params (const uint8_t *); Nim cannot
+## express const pointers, and gcc >= 14 makes the mismatch a hard error.
+## Our trampolines never write through them, so keep it a warning.
+{.passC: "-Wno-error=incompatible-pointer-types".}
+{.passL: staticExec("pkg-config --static --libs toxcore").}
 
 type
-  Tox* {.importc: "Tox", header: "tox.h", incompleteStruct.} = object
+  Tox* {.importc: "Tox", header: "tox/tox.h", incompleteStruct.} = object
 
 ##  SPDX-License-Identifier: GPL-3.0-or-later
 ##  Copyright © 2016-2024 The TokTok team.
@@ -125,7 +129,7 @@ type
 const
   TOX_VERSION_MAJOR* = 0
 
-proc tox_version_major*(): uint32 {.importc: "tox_version_major", header: "tox.h".}
+proc tox_version_major*(): uint32 {.importc: "tox_version_major", header: "tox/tox.h".}
 ##
 ##  @brief The minor version number.
 ##
@@ -136,7 +140,7 @@ proc tox_version_major*(): uint32 {.importc: "tox_version_major", header: "tox.h
 const
   TOX_VERSION_MINOR* = 2
 
-proc tox_version_minor*(): uint32 {.importc: "tox_version_minor", header: "tox.h".}
+proc tox_version_minor*(): uint32 {.importc: "tox_version_minor", header: "tox/tox.h".}
 ##
 ##  @brief The patch or revision number.
 ##
@@ -147,7 +151,7 @@ proc tox_version_minor*(): uint32 {.importc: "tox_version_minor", header: "tox.h
 const
   TOX_VERSION_PATCH* = 19
 
-proc tox_version_patch*(): uint32 {.importc: "tox_version_patch", header: "tox.h".}
+proc tox_version_patch*(): uint32 {.importc: "tox_version_patch", header: "tox/tox.h".}
 ## !TOKSTYLE-
 ##
 ##  @brief A macro to check at preprocessing time whether the client code is
@@ -174,7 +178,7 @@ template TOX_VERSION_IS_API_COMPATIBLE*(MAJOR, MINOR, PATCH: untyped): untyped =
 ##
 
 proc tox_version_is_compatible*(major: uint32; minor: uint32; patch: uint32): bool {.
-    importc: "tox_version_is_compatible", header: "tox.h".}
+    importc: "tox_version_is_compatible", header: "tox/tox.h".}
 ##
 ##  @brief A convenience macro to call tox_version_is_compatible with the
 ##    currently compiling API version.
@@ -199,7 +203,7 @@ template TOX_VERSION_IS_ABI_COMPATIBLE*(): untyped =
 const
   TOX_PUBLIC_KEY_SIZE* = 32
 
-proc tox_public_key_size*(): uint32 {.importc: "tox_public_key_size", header: "tox.h".}
+proc tox_public_key_size*(): uint32 {.importc: "tox_public_key_size", header: "tox/tox.h".}
 ##
 ##  @brief The size of a Tox Secret Key in bytes.
 ##
@@ -207,7 +211,7 @@ proc tox_public_key_size*(): uint32 {.importc: "tox_public_key_size", header: "t
 const
   TOX_SECRET_KEY_SIZE* = 32
 
-proc tox_secret_key_size*(): uint32 {.importc: "tox_secret_key_size", header: "tox.h".}
+proc tox_secret_key_size*(): uint32 {.importc: "tox_secret_key_size", header: "tox/tox.h".}
 ##
 ##  @brief The size of a Tox Conference unique id in bytes.
 ##
@@ -218,7 +222,7 @@ const
   TOX_CONFERENCE_UID_SIZE* = 32
 
 proc tox_conference_uid_size*(): uint32 {.importc: "tox_conference_uid_size",
-                                       header: "tox.h".}
+                                       header: "tox/tox.h".}
 ##
 ##  @brief The size of a Tox Conference unique id in bytes.
 ##
@@ -227,7 +231,7 @@ const
   TOX_CONFERENCE_ID_SIZE* = 32
 
 proc tox_conference_id_size*(): uint32 {.importc: "tox_conference_id_size",
-                                      header: "tox.h".}
+                                      header: "tox/tox.h".}
 ##
 ##  @brief The size of the nospam in bytes when written in a Tox address.
 ##
@@ -235,7 +239,7 @@ proc tox_conference_id_size*(): uint32 {.importc: "tox_conference_id_size",
 const
   TOX_NOSPAM_SIZE* = (sizeof((uint32)))
 
-proc tox_nospam_size*(): uint32 {.importc: "tox_nospam_size", header: "tox.h".}
+proc tox_nospam_size*(): uint32 {.importc: "tox_nospam_size", header: "tox/tox.h".}
 ##
 ##  @brief The size of a Tox address in bytes.
 ##
@@ -250,7 +254,7 @@ proc tox_nospam_size*(): uint32 {.importc: "tox_nospam_size", header: "tox.h".}
 const
   TOX_ADDRESS_SIZE* = (TOX_PUBLIC_KEY_SIZE + TOX_NOSPAM_SIZE + sizeof((uint16)))
 
-proc tox_address_size*(): uint32 {.importc: "tox_address_size", header: "tox.h".}
+proc tox_address_size*(): uint32 {.importc: "tox_address_size", header: "tox/tox.h".}
 ##
 ##  @brief Maximum length of a nickname in bytes.
 ##
@@ -260,7 +264,7 @@ proc tox_address_size*(): uint32 {.importc: "tox_address_size", header: "tox.h".
 const
   TOX_MAX_NAME_LENGTH* = 128
 
-proc tox_max_name_length*(): uint32 {.importc: "tox_max_name_length", header: "tox.h".}
+proc tox_max_name_length*(): uint32 {.importc: "tox_max_name_length", header: "tox/tox.h".}
 ##
 ##  @brief Maximum length of a status message in bytes.
 ##
@@ -271,7 +275,7 @@ const
   TOX_MAX_STATUS_MESSAGE_LENGTH* = 1007
 
 proc tox_max_status_message_length*(): uint32 {.
-    importc: "tox_max_status_message_length", header: "tox.h".}
+    importc: "tox_max_status_message_length", header: "tox/tox.h".}
 ##
 ##  @brief Maximum length of a friend request message in bytes.
 ##
@@ -282,7 +286,7 @@ const
   TOX_MAX_FRIEND_REQUEST_LENGTH* = 1016
 
 proc tox_max_friend_request_length*(): uint32 {.
-    importc: "tox_max_friend_request_length", header: "tox.h".}
+    importc: "tox_max_friend_request_length", header: "tox/tox.h".}
 ##
 ##  @brief Maximum length of a single message after which it should be split.
 ##
@@ -293,7 +297,7 @@ const
   TOX_MAX_MESSAGE_LENGTH* = 1372
 
 proc tox_max_message_length*(): uint32 {.importc: "tox_max_message_length",
-                                      header: "tox.h".}
+                                      header: "tox/tox.h".}
 ##
 ##  @brief Maximum size of custom packets. TODO(iphydf): should be LENGTH?
 ##
@@ -304,7 +308,7 @@ const
   TOX_MAX_CUSTOM_PACKET_SIZE* = 1373
 
 proc tox_max_custom_packet_size*(): uint32 {.importc: "tox_max_custom_packet_size",
-    header: "tox.h".}
+    header: "tox/tox.h".}
 ##
 ##  @brief The number of bytes in a hash generated by tox_hash.
 ##
@@ -312,7 +316,7 @@ proc tox_max_custom_packet_size*(): uint32 {.importc: "tox_max_custom_packet_siz
 const
   TOX_HASH_LENGTH* = 32
 
-proc tox_hash_length*(): uint32 {.importc: "tox_hash_length", header: "tox.h".}
+proc tox_hash_length*(): uint32 {.importc: "tox_hash_length", header: "tox/tox.h".}
 ##
 ##  @brief The number of bytes in a file id.
 ##
@@ -320,7 +324,7 @@ proc tox_hash_length*(): uint32 {.importc: "tox_hash_length", header: "tox.h".}
 const
   TOX_FILE_ID_LENGTH* = 32
 
-proc tox_file_id_length*(): uint32 {.importc: "tox_file_id_length", header: "tox.h".}
+proc tox_file_id_length*(): uint32 {.importc: "tox_file_id_length", header: "tox/tox.h".}
 ##
 ##  @brief Maximum file name length for file transfers.
 ##
@@ -331,7 +335,7 @@ const
   TOX_MAX_FILENAME_LENGTH* = 255
 
 proc tox_max_filename_length*(): uint32 {.importc: "tox_max_filename_length",
-                                       header: "tox.h".}
+                                       header: "tox/tox.h".}
 ##
 ##  @brief Maximum length of a hostname, e.g. proxy or bootstrap node names.
 ##
@@ -345,7 +349,7 @@ const
   TOX_MAX_HOSTNAME_LENGTH* = 255
 
 proc tox_max_hostname_length*(): uint32 {.importc: "tox_max_hostname_length",
-                                       header: "tox.h".}
+                                       header: "tox/tox.h".}
 ##  @}
 ##  @{
 ##  @name Global enumerations
@@ -357,7 +361,7 @@ proc tox_max_hostname_length*(): uint32 {.importc: "tox_max_hostname_length",
 type                          ##
     ##  User is online and available.
     ##
-  Tox_User_Status* {.size: sizeof(cint).} = enum
+  Tox_User_Status* {.size: sizeof(cint), importc: "Tox_User_Status", header: "tox/tox.h".} = enum
     TOX_USER_STATUS_NONE, ##
                          ##  User is away. Clients can set this e.g. after a user defined
                          ##  inactivity time.
@@ -370,7 +374,7 @@ type                          ##
 
 
 proc tox_user_status_to_string*(value: Tox_User_Status): cstring {.
-    importc: "tox_user_status_to_string", header: "tox.h".}
+    importc: "tox_user_status_to_string", header: "tox/tox.h".}
 ##
 ##  @brief Represents message types for tox_friend_send_message and conference
 ##    messages.
@@ -379,7 +383,7 @@ proc tox_user_status_to_string*(value: Tox_User_Status): cstring {.
 type                          ##
     ##  Normal text message. Similar to PRIVMSG on IRC.
     ##
-  Tox_Message_Type* {.size: sizeof(cint).} = enum
+  Tox_Message_Type* {.size: sizeof(cint), importc: "Tox_Message_Type", header: "tox/tox.h".} = enum
     TOX_MESSAGE_TYPE_NORMAL, ##
                             ##  A message describing an user action. This is similar to /me (CTCP ACTION)
                             ##  on IRC.
@@ -388,7 +392,7 @@ type                          ##
 
 
 proc tox_message_type_to_string*(value: Tox_Message_Type): cstring {.
-    importc: "tox_message_type_to_string", header: "tox.h".}
+    importc: "tox_message_type_to_string", header: "tox/tox.h".}
 ##  @}
 ##  @{
 ##  @name Startup options
@@ -400,7 +404,7 @@ proc tox_message_type_to_string*(value: Tox_Message_Type): cstring {.
 type                          ##
     ##  Don't use a proxy.
     ##
-  Tox_Proxy_Type* {.size: sizeof(cint).} = enum
+  Tox_Proxy_Type* {.size: sizeof(cint), importc: "Tox_Proxy_Type", header: "tox/tox.h".} = enum
     TOX_PROXY_TYPE_NONE,      ##
                         ##  HTTP proxy using CONNECT.
                         ##
@@ -411,7 +415,7 @@ type                          ##
 
 
 proc tox_proxy_type_to_string*(value: Tox_Proxy_Type): cstring {.
-    importc: "tox_proxy_type_to_string", header: "tox.h".}
+    importc: "tox_proxy_type_to_string", header: "tox/tox.h".}
 ##
 ##  @brief Type of savedata to create the Tox instance from.
 ##
@@ -419,7 +423,7 @@ proc tox_proxy_type_to_string*(value: Tox_Proxy_Type): cstring {.
 type                          ##
     ##  No savedata.
     ##
-  Tox_Savedata_Type* {.size: sizeof(cint).} = enum
+  Tox_Savedata_Type* {.size: sizeof(cint), importc: "Tox_Savedata_Type", header: "tox/tox.h".} = enum
     TOX_SAVEDATA_TYPE_NONE, ##
                            ##  Savedata is one that was obtained from tox_get_savedata.
                            ##
@@ -430,7 +434,7 @@ type                          ##
 
 
 proc tox_savedata_type_to_string*(value: Tox_Savedata_Type): cstring {.
-    importc: "tox_savedata_type_to_string", header: "tox.h".}
+    importc: "tox_savedata_type_to_string", header: "tox/tox.h".}
 ##
 ##  @brief Severity level of log messages.
 ##
@@ -438,7 +442,7 @@ proc tox_savedata_type_to_string*(value: Tox_Savedata_Type): cstring {.
 type ##
     ##  Very detailed traces including all network activity.
     ##
-  Tox_Log_Level* {.size: sizeof(cint).} = enum
+  Tox_Log_Level* {.size: sizeof(cint), importc: "Tox_Log_Level", header: "tox/tox.h".} = enum
     TOX_LOG_LEVEL_TRACE,      ##
                         ##  Debug messages such as which port we bind to.
                         ##
@@ -455,7 +459,7 @@ type ##
 
 
 proc tox_log_level_to_string*(value: Tox_Log_Level): cstring {.
-    importc: "tox_log_level_to_string", header: "tox.h".}
+    importc: "tox_log_level_to_string", header: "tox/tox.h".}
 ##
 ##  @brief This event is triggered when Tox logs an internal message.
 ##
@@ -499,7 +503,7 @@ type
 ##
 
 type
-  Tox_Options* {.importc: "Tox_Options", header: "tox.h", bycopy.} = object
+  Tox_Options* {.importc: "Tox_Options", header: "tox/tox.h", bycopy.} = object
     ##
     ##  The type of socket to create.
     ##
@@ -640,87 +644,87 @@ type
 
 
 proc tox_options_get_ipv6_enabled*(options: ptr Tox_Options): bool {.
-    importc: "tox_options_get_ipv6_enabled", header: "tox.h".}
+    importc: "tox_options_get_ipv6_enabled", header: "tox/tox.h".}
 proc tox_options_set_ipv6_enabled*(options: ptr Tox_Options; ipv6_enabled: bool) {.
-    importc: "tox_options_set_ipv6_enabled", header: "tox.h".}
+    importc: "tox_options_set_ipv6_enabled", header: "tox/tox.h".}
 proc tox_options_get_udp_enabled*(options: ptr Tox_Options): bool {.
-    importc: "tox_options_get_udp_enabled", header: "tox.h".}
+    importc: "tox_options_get_udp_enabled", header: "tox/tox.h".}
 proc tox_options_set_udp_enabled*(options: ptr Tox_Options; udp_enabled: bool) {.
-    importc: "tox_options_set_udp_enabled", header: "tox.h".}
+    importc: "tox_options_set_udp_enabled", header: "tox/tox.h".}
 proc tox_options_get_local_discovery_enabled*(options: ptr Tox_Options): bool {.
-    importc: "tox_options_get_local_discovery_enabled", header: "tox.h".}
+    importc: "tox_options_get_local_discovery_enabled", header: "tox/tox.h".}
 proc tox_options_set_local_discovery_enabled*(options: ptr Tox_Options;
     local_discovery_enabled: bool) {.importc: "tox_options_set_local_discovery_enabled",
-                                   header: "tox.h".}
+                                   header: "tox/tox.h".}
 proc tox_options_get_dht_announcements_enabled*(options: ptr Tox_Options): bool {.
-    importc: "tox_options_get_dht_announcements_enabled", header: "tox.h".}
+    importc: "tox_options_get_dht_announcements_enabled", header: "tox/tox.h".}
 proc tox_options_set_dht_announcements_enabled*(options: ptr Tox_Options;
     dht_announcements_enabled: bool) {.importc: "tox_options_set_dht_announcements_enabled",
-                                     header: "tox.h".}
+                                     header: "tox/tox.h".}
 proc tox_options_get_proxy_type*(options: ptr Tox_Options): Tox_Proxy_Type {.
-    importc: "tox_options_get_proxy_type", header: "tox.h".}
+    importc: "tox_options_get_proxy_type", header: "tox/tox.h".}
 proc tox_options_set_proxy_type*(options: ptr Tox_Options;
                                 proxy_type: Tox_Proxy_Type) {.
-    importc: "tox_options_set_proxy_type", header: "tox.h".}
+    importc: "tox_options_set_proxy_type", header: "tox/tox.h".}
 proc tox_options_get_proxy_host*(options: ptr Tox_Options): cstring {.
-    importc: "tox_options_get_proxy_host", header: "tox.h".}
+    importc: "tox_options_get_proxy_host", header: "tox/tox.h".}
 proc tox_options_set_proxy_host*(options: ptr Tox_Options; proxy_host: cstring) {.
-    importc: "tox_options_set_proxy_host", header: "tox.h".}
+    importc: "tox_options_set_proxy_host", header: "tox/tox.h".}
 proc tox_options_get_proxy_port*(options: ptr Tox_Options): uint16 {.
-    importc: "tox_options_get_proxy_port", header: "tox.h".}
+    importc: "tox_options_get_proxy_port", header: "tox/tox.h".}
 proc tox_options_set_proxy_port*(options: ptr Tox_Options; proxy_port: uint16) {.
-    importc: "tox_options_set_proxy_port", header: "tox.h".}
+    importc: "tox_options_set_proxy_port", header: "tox/tox.h".}
 proc tox_options_get_start_port*(options: ptr Tox_Options): uint16 {.
-    importc: "tox_options_get_start_port", header: "tox.h".}
+    importc: "tox_options_get_start_port", header: "tox/tox.h".}
 proc tox_options_set_start_port*(options: ptr Tox_Options; start_port: uint16) {.
-    importc: "tox_options_set_start_port", header: "tox.h".}
+    importc: "tox_options_set_start_port", header: "tox/tox.h".}
 proc tox_options_get_end_port*(options: ptr Tox_Options): uint16 {.
-    importc: "tox_options_get_end_port", header: "tox.h".}
+    importc: "tox_options_get_end_port", header: "tox/tox.h".}
 proc tox_options_set_end_port*(options: ptr Tox_Options; end_port: uint16) {.
-    importc: "tox_options_set_end_port", header: "tox.h".}
+    importc: "tox_options_set_end_port", header: "tox/tox.h".}
 proc tox_options_get_tcp_port*(options: ptr Tox_Options): uint16 {.
-    importc: "tox_options_get_tcp_port", header: "tox.h".}
+    importc: "tox_options_get_tcp_port", header: "tox/tox.h".}
 proc tox_options_set_tcp_port*(options: ptr Tox_Options; tcp_port: uint16) {.
-    importc: "tox_options_set_tcp_port", header: "tox.h".}
+    importc: "tox_options_set_tcp_port", header: "tox/tox.h".}
 proc tox_options_get_hole_punching_enabled*(options: ptr Tox_Options): bool {.
-    importc: "tox_options_get_hole_punching_enabled", header: "tox.h".}
+    importc: "tox_options_get_hole_punching_enabled", header: "tox/tox.h".}
 proc tox_options_set_hole_punching_enabled*(options: ptr Tox_Options;
     hole_punching_enabled: bool) {.importc: "tox_options_set_hole_punching_enabled",
-                                 header: "tox.h".}
+                                 header: "tox/tox.h".}
 proc tox_options_get_savedata_type*(options: ptr Tox_Options): Tox_Savedata_Type {.
-    importc: "tox_options_get_savedata_type", header: "tox.h".}
+    importc: "tox_options_get_savedata_type", header: "tox/tox.h".}
 proc tox_options_set_savedata_type*(options: ptr Tox_Options;
                                    savedata_type: Tox_Savedata_Type) {.
-    importc: "tox_options_set_savedata_type", header: "tox.h".}
+    importc: "tox_options_set_savedata_type", header: "tox/tox.h".}
 proc tox_options_get_savedata_data*(options: ptr Tox_Options): ptr uint8 {.
-    importc: "tox_options_get_savedata_data", header: "tox.h".}
+    importc: "tox_options_get_savedata_data", header: "tox/tox.h".}
 proc tox_options_set_savedata_data*(options: ptr Tox_Options;
                                    savedata_data: ptr uint8; length: csize_t) {.
-    importc: "tox_options_set_savedata_data", header: "tox.h".}
+    importc: "tox_options_set_savedata_data", header: "tox/tox.h".}
 proc tox_options_get_savedata_length*(options: ptr Tox_Options): csize_t {.
-    importc: "tox_options_get_savedata_length", header: "tox.h".}
+    importc: "tox_options_get_savedata_length", header: "tox/tox.h".}
 proc tox_options_set_savedata_length*(options: ptr Tox_Options;
                                      savedata_length: csize_t) {.
-    importc: "tox_options_set_savedata_length", header: "tox.h".}
+    importc: "tox_options_set_savedata_length", header: "tox/tox.h".}
 proc tox_options_get_log_callback*(options: ptr Tox_Options): ptr tox_log_cb {.
-    importc: "tox_options_get_log_callback", header: "tox.h".}
+    importc: "tox_options_get_log_callback", header: "tox/tox.h".}
 proc tox_options_set_log_callback*(options: ptr Tox_Options;
                                   log_callback: ptr tox_log_cb) {.
-    importc: "tox_options_set_log_callback", header: "tox.h".}
+    importc: "tox_options_set_log_callback", header: "tox/tox.h".}
 proc tox_options_get_log_user_data*(options: ptr Tox_Options): pointer {.
-    importc: "tox_options_get_log_user_data", header: "tox.h".}
+    importc: "tox_options_get_log_user_data", header: "tox/tox.h".}
 proc tox_options_set_log_user_data*(options: ptr Tox_Options; log_user_data: pointer) {.
-    importc: "tox_options_set_log_user_data", header: "tox.h".}
+    importc: "tox_options_set_log_user_data", header: "tox/tox.h".}
 proc tox_options_get_experimental_thread_safety*(options: ptr Tox_Options): bool {.
-    importc: "tox_options_get_experimental_thread_safety", header: "tox.h".}
+    importc: "tox_options_get_experimental_thread_safety", header: "tox/tox.h".}
 proc tox_options_set_experimental_thread_safety*(options: ptr Tox_Options;
     experimental_thread_safety: bool) {.importc: "tox_options_set_experimental_thread_safety",
-                                      header: "tox.h".}
+                                      header: "tox/tox.h".}
 proc tox_options_get_experimental_groups_persistence*(options: ptr Tox_Options): bool {.
-    importc: "tox_options_get_experimental_groups_persistence", header: "tox.h".}
+    importc: "tox_options_get_experimental_groups_persistence", header: "tox/tox.h".}
 proc tox_options_set_experimental_groups_persistence*(options: ptr Tox_Options;
     experimental_groups_persistence: bool) {.
-    importc: "tox_options_set_experimental_groups_persistence", header: "tox.h".}
+    importc: "tox_options_set_experimental_groups_persistence", header: "tox/tox.h".}
 ##
 ##  @brief Initialises a Tox_Options object with the default options.
 ##
@@ -734,11 +738,11 @@ proc tox_options_set_experimental_groups_persistence*(options: ptr Tox_Options;
 ##
 
 proc tox_options_default*(options: ptr Tox_Options) {.
-    importc: "tox_options_default", header: "tox.h".}
+    importc: "tox_options_default", header: "tox/tox.h".}
 type                          ##
     ##  The function returned successfully.
     ##
-  Tox_Err_Options_New* {.size: sizeof(cint).} = enum
+  Tox_Err_Options_New* {.size: sizeof(cint), importc: "Tox_Err_Options_New", header: "tox/tox.h".} = enum
     TOX_ERR_OPTIONS_NEW_OK, ##
                            ##  The function failed to allocate enough memory for the options struct.
                            ##
@@ -746,7 +750,7 @@ type                          ##
 
 
 proc tox_err_options_new_to_string*(value: Tox_Err_Options_New): cstring {.
-    importc: "tox_err_options_new_to_string", header: "tox.h".}
+    importc: "tox_err_options_new_to_string", header: "tox/tox.h".}
 ##
 ##  @brief Allocates a new Tox_Options object and initialises it with the default
 ##    options.
@@ -761,7 +765,7 @@ proc tox_err_options_new_to_string*(value: Tox_Err_Options_New): cstring {.
 ##
 
 proc tox_options_new*(error: ptr Tox_Err_Options_New): ptr Tox_Options {.
-    importc: "tox_options_new", header: "tox.h".}
+    importc: "tox_options_new", header: "tox/tox.h".}
 ##
 ##  @brief Releases all resources associated with an options objects.
 ##
@@ -770,7 +774,7 @@ proc tox_options_new*(error: ptr Tox_Err_Options_New): ptr Tox_Options {.
 ##
 
 proc tox_options_free*(options: ptr Tox_Options) {.importc: "tox_options_free",
-    header: "tox.h".}
+    header: "tox/tox.h".}
 ##  @}
 ##  @{
 ##  @name Creation and destruction
@@ -779,7 +783,7 @@ proc tox_options_free*(options: ptr Tox_Options) {.importc: "tox_options_free",
 type                          ##
     ##  The function returned successfully.
     ##
-  Tox_Err_New* {.size: sizeof(cint).} = enum
+  Tox_Err_New* {.size: sizeof(cint), importc: "Tox_Err_New", header: "tox/tox.h".} = enum
     TOX_ERR_NEW_OK, ##
                    ##  One of the arguments to the function was NULL when it was not expected.
                    ##
@@ -820,7 +824,7 @@ type                          ##
 
 
 proc tox_err_new_to_string*(value: Tox_Err_New): cstring {.
-    importc: "tox_err_new_to_string", header: "tox.h".}
+    importc: "tox_err_new_to_string", header: "tox/tox.h".}
 ##
 ##  @brief Creates and initialises a new Tox instance with the options passed.
 ##
@@ -836,7 +840,7 @@ proc tox_err_new_to_string*(value: Tox_Err_New): cstring {.
 ##
 
 proc tox_new*(options: ptr Tox_Options; error: ptr Tox_Err_New): ptr Tox {.
-    importc: "tox_new", header: "tox.h".}
+    importc: "tox_new", header: "tox/tox.h".}
 ##
 ##  @brief Releases all resources associated with the Tox instance and
 ##    disconnects from the network.
@@ -845,7 +849,7 @@ proc tox_new*(options: ptr Tox_Options; error: ptr Tox_Err_New): ptr Tox {.
 ##  functions can be called, and the pointer value can no longer be read.
 ##
 
-proc tox_kill*(tox: ptr Tox) {.importc: "tox_kill", header: "tox.h".}
+proc tox_kill*(tox: ptr Tox) {.importc: "tox_kill", header: "tox/tox.h".}
 ##
 ##  @brief Calculates the number of bytes required to store the Tox instance with
 ##    tox_get_savedata.
@@ -856,7 +860,7 @@ proc tox_kill*(tox: ptr Tox) {.importc: "tox_kill", header: "tox.h".}
 ##
 
 proc tox_get_savedata_size*(tox: ptr Tox): csize_t {.
-    importc: "tox_get_savedata_size", header: "tox.h".}
+    importc: "tox_get_savedata_size", header: "tox/tox.h".}
 ##
 ##  @brief Store all information associated with the Tox instance to a byte
 ##    array.
@@ -867,7 +871,7 @@ proc tox_get_savedata_size*(tox: ptr Tox): csize_t {.
 ##
 
 proc tox_get_savedata*(tox: ptr Tox; savedata: ptr uint8) {.
-    importc: "tox_get_savedata", header: "tox.h".}
+    importc: "tox_get_savedata", header: "tox/tox.h".}
 ##  @}
 ##  @{
 ##  @name Connection lifecycle and event loop
@@ -876,7 +880,7 @@ proc tox_get_savedata*(tox: ptr Tox; savedata: ptr uint8) {.
 type                          ##
     ##  The function returned successfully.
     ##
-  Tox_Err_Bootstrap* {.size: sizeof(cint).} = enum
+  Tox_Err_Bootstrap* {.size: sizeof(cint), importc: "Tox_Err_Bootstrap", header: "tox/tox.h".} = enum
     TOX_ERR_BOOTSTRAP_OK, ##
                          ##  One of the arguments to the function was NULL when it was not expected.
                          ##
@@ -892,7 +896,7 @@ type                          ##
 
 
 proc tox_err_bootstrap_to_string*(value: Tox_Err_Bootstrap): cstring {.
-    importc: "tox_err_bootstrap_to_string", header: "tox.h".}
+    importc: "tox_err_bootstrap_to_string", header: "tox/tox.h".}
 ##
 ##  @brief Sends a "get nodes" request to the given bootstrap node with IP, port,
 ##    and public key to setup connections.
@@ -912,7 +916,7 @@ proc tox_err_bootstrap_to_string*(value: Tox_Err_Bootstrap): cstring {.
 proc tox_bootstrap*(tox: ptr Tox; host: cstring; port: uint16;
                    public_key: array[TOX_PUBLIC_KEY_SIZE, uint8];
                    error: ptr Tox_Err_Bootstrap): bool {.importc: "tox_bootstrap",
-    header: "tox.h".}
+    header: "tox/tox.h".}
 ##
 ##  @brief Adds additional host:port pair as TCP relay.
 ##
@@ -931,7 +935,7 @@ proc tox_bootstrap*(tox: ptr Tox; host: cstring; port: uint16;
 proc tox_add_tcp_relay*(tox: ptr Tox; host: cstring; port: uint16;
                        public_key: array[TOX_PUBLIC_KEY_SIZE, uint8];
                        error: ptr Tox_Err_Bootstrap): bool {.
-    importc: "tox_add_tcp_relay", header: "tox.h".}
+    importc: "tox_add_tcp_relay", header: "tox/tox.h".}
 ##
 ##  @brief Protocols that can be used to connect to the network or friends.
 ##
@@ -941,7 +945,7 @@ type ##
     ##
     ##  This instance, or the friend the state change is about, is now offline.
     ##
-  Tox_Connection* {.size: sizeof(cint).} = enum
+  Tox_Connection* {.size: sizeof(cint), importc: "Tox_Connection", header: "tox/tox.h".} = enum
     TOX_CONNECTION_NONE, ##
                         ##  @brief A TCP connection has been established.
                         ##
@@ -961,7 +965,7 @@ type ##
 
 
 proc tox_connection_to_string*(value: Tox_Connection): cstring {.
-    importc: "tox_connection_to_string", header: "tox.h".}
+    importc: "tox_connection_to_string", header: "tox/tox.h".}
 ##
 ##  @brief Return whether we are connected to the DHT.
 ##
@@ -973,7 +977,7 @@ proc tox_connection_to_string*(value: Tox_Connection): cstring {.
 ##
 
 proc tox_self_get_connection_status*(tox: ptr Tox): Tox_Connection {.
-    importc: "tox_self_get_connection_status", header: "tox.h".}
+    importc: "tox_self_get_connection_status", header: "tox/tox.h".}
 ##
 ##  @param connection_status Whether we are connected to the DHT.
 ##
@@ -998,15 +1002,15 @@ type
 ##
 
 proc tox_callback_self_connection_status*(tox: ptr Tox;
-    callback: ptr tox_self_connection_status_cb) {.
-    importc: "tox_callback_self_connection_status", header: "tox.h".}
+    callback: tox_self_connection_status_cb) {.
+    importc: "tox_callback_self_connection_status", header: "tox/tox.h".}
 ##
 ##  @brief Return the time in milliseconds before `tox_iterate()` should be
 ##    called again for optimal performance.
 ##
 
 proc tox_iteration_interval*(tox: ptr Tox): uint32 {.
-    importc: "tox_iteration_interval", header: "tox.h".}
+    importc: "tox_iteration_interval", header: "tox/tox.h".}
 ##
 ##  @brief The main loop that needs to be run in intervals of
 ##    `tox_iteration_interval()` milliseconds.
@@ -1015,7 +1019,7 @@ proc tox_iteration_interval*(tox: ptr Tox): uint32 {.
 ##
 
 proc tox_iterate*(tox: ptr Tox; user_data: pointer) {.importc: "tox_iterate",
-    header: "tox.h".}
+    header: "tox/tox.h".}
 ##  @}
 ##  @{
 ##  @name Internal client information (Tox address/id)
@@ -1032,7 +1036,7 @@ proc tox_iterate*(tox: ptr Tox; user_data: pointer) {.importc: "tox_iterate",
 ##
 
 proc tox_self_get_address*(tox: ptr Tox; address: array[TOX_ADDRESS_SIZE, uint8]) {.
-    importc: "tox_self_get_address", header: "tox.h".}
+    importc: "tox_self_get_address", header: "tox/tox.h".}
 ##
 ##  @brief Set the 4-byte nospam part of the address.
 ##
@@ -1043,7 +1047,7 @@ proc tox_self_get_address*(tox: ptr Tox; address: array[TOX_ADDRESS_SIZE, uint8]
 ##
 
 proc tox_self_set_nospam*(tox: ptr Tox; nospam: uint32) {.
-    importc: "tox_self_set_nospam", header: "tox.h".}
+    importc: "tox_self_set_nospam", header: "tox/tox.h".}
 ##
 ##  @brief Get the 4-byte nospam part of the address.
 ##
@@ -1051,7 +1055,7 @@ proc tox_self_set_nospam*(tox: ptr Tox; nospam: uint32) {.
 ##
 
 proc tox_self_get_nospam*(tox: ptr Tox): uint32 {.importc: "tox_self_get_nospam",
-    header: "tox.h".}
+    header: "tox/tox.h".}
 ##
 ##  @brief Copy the Tox Public Key (long term) from the Tox object.
 ##
@@ -1061,7 +1065,7 @@ proc tox_self_get_nospam*(tox: ptr Tox): uint32 {.importc: "tox_self_get_nospam"
 
 proc tox_self_get_public_key*(tox: ptr Tox;
                              public_key: array[TOX_PUBLIC_KEY_SIZE, uint8]) {.
-    importc: "tox_self_get_public_key", header: "tox.h".}
+    importc: "tox_self_get_public_key", header: "tox/tox.h".}
 ##
 ##  @brief Copy the Tox Secret Key from the Tox object.
 ##
@@ -1071,7 +1075,7 @@ proc tox_self_get_public_key*(tox: ptr Tox;
 
 proc tox_self_get_secret_key*(tox: ptr Tox;
                              secret_key: array[TOX_SECRET_KEY_SIZE, uint8]) {.
-    importc: "tox_self_get_secret_key", header: "tox.h".}
+    importc: "tox_self_get_secret_key", header: "tox/tox.h".}
 ##  @}
 ##  @{
 ##  @name User-visible client information (nickname/status)
@@ -1084,7 +1088,7 @@ proc tox_self_get_secret_key*(tox: ptr Tox;
 type                          ##
     ##  The function returned successfully.
     ##
-  Tox_Err_Set_Info* {.size: sizeof(cint).} = enum
+  Tox_Err_Set_Info* {.size: sizeof(cint), importc: "Tox_Err_Set_Info", header: "tox/tox.h".} = enum
     TOX_ERR_SET_INFO_OK, ##
                         ##  One of the arguments to the function was NULL when it was not expected.
                         ##
@@ -1095,7 +1099,7 @@ type                          ##
 
 
 proc tox_err_set_info_to_string*(value: Tox_Err_Set_Info): cstring {.
-    importc: "tox_err_set_info_to_string", header: "tox.h".}
+    importc: "tox_err_set_info_to_string", header: "tox/tox.h".}
 ##
 ##  @brief Set the nickname for the Tox client.
 ##
@@ -1110,7 +1114,7 @@ proc tox_err_set_info_to_string*(value: Tox_Err_Set_Info): cstring {.
 
 proc tox_self_set_name*(tox: ptr Tox; name: ptr uint8; length: csize_t;
                        error: ptr Tox_Err_Set_Info): bool {.
-    importc: "tox_self_set_name", header: "tox.h".}
+    importc: "tox_self_set_name", header: "tox/tox.h".}
 ##
 ##  @brief Return the length of the current nickname as passed to
 ##    tox_self_set_name.
@@ -1122,7 +1126,7 @@ proc tox_self_set_name*(tox: ptr Tox; name: ptr uint8; length: csize_t;
 ##
 
 proc tox_self_get_name_size*(tox: ptr Tox): csize_t {.
-    importc: "tox_self_get_name_size", header: "tox.h".}
+    importc: "tox_self_get_name_size", header: "tox/tox.h".}
 ##
 ##  @brief Write the nickname set by tox_self_set_name to a byte array.
 ##
@@ -1137,7 +1141,7 @@ proc tox_self_get_name_size*(tox: ptr Tox): csize_t {.
 ##
 
 proc tox_self_get_name*(tox: ptr Tox; name: ptr uint8) {.importc: "tox_self_get_name",
-    header: "tox.h".}
+    header: "tox/tox.h".}
 ##
 ##  @brief Set the client's status message.
 ##
@@ -1148,7 +1152,7 @@ proc tox_self_get_name*(tox: ptr Tox; name: ptr uint8) {.importc: "tox_self_get_
 
 proc tox_self_set_status_message*(tox: ptr Tox; status_message: ptr uint8;
                                  length: csize_t; error: ptr Tox_Err_Set_Info): bool {.
-    importc: "tox_self_set_status_message", header: "tox.h".}
+    importc: "tox_self_set_status_message", header: "tox/tox.h".}
 ##
 ##  @brief Return the length of the current status message as passed to
 ##    tox_self_set_status_message.
@@ -1160,7 +1164,7 @@ proc tox_self_set_status_message*(tox: ptr Tox; status_message: ptr uint8;
 ##
 
 proc tox_self_get_status_message_size*(tox: ptr Tox): csize_t {.
-    importc: "tox_self_get_status_message_size", header: "tox.h".}
+    importc: "tox_self_get_status_message_size", header: "tox/tox.h".}
 ##
 ##  @brief Write the status message set by tox_self_set_status_message to a byte
 ##    array.
@@ -1176,7 +1180,7 @@ proc tox_self_get_status_message_size*(tox: ptr Tox): csize_t {.
 ##
 
 proc tox_self_get_status_message*(tox: ptr Tox; status_message: ptr uint8) {.
-    importc: "tox_self_get_status_message", header: "tox.h".}
+    importc: "tox_self_get_status_message", header: "tox/tox.h".}
 ##
 ##  @brief Set the client's user status.
 ##
@@ -1184,13 +1188,13 @@ proc tox_self_get_status_message*(tox: ptr Tox; status_message: ptr uint8) {.
 ##
 
 proc tox_self_set_status*(tox: ptr Tox; status: Tox_User_Status) {.
-    importc: "tox_self_set_status", header: "tox.h".}
+    importc: "tox_self_set_status", header: "tox/tox.h".}
 ##
 ##  @brief Returns the client's user status.
 ##
 
 proc tox_self_get_status*(tox: ptr Tox): Tox_User_Status {.
-    importc: "tox_self_get_status", header: "tox.h".}
+    importc: "tox_self_get_status", header: "tox/tox.h".}
 ##  @}
 ##  @{
 ##  @name Friend list management
@@ -1200,7 +1204,7 @@ type                          ##
     ##  The function returned successfully.
     ##
   Tox_Friend_Number* = uint32
-  Tox_Err_Friend_Add* {.size: sizeof(cint).} = enum
+  Tox_Err_Friend_Add* {.size: sizeof(cint), importc: "Tox_Err_Friend_Add", header: "tox/tox.h".} = enum
     TOX_ERR_FRIEND_ADD_OK, ##
                           ##  One of the arguments to the function was NULL when it was not expected.
                           ##
@@ -1232,7 +1236,7 @@ type                          ##
 
 
 proc tox_err_friend_add_to_string*(value: Tox_Err_Friend_Add): cstring {.
-    importc: "tox_err_friend_add_to_string", header: "tox.h".}
+    importc: "tox_err_friend_add_to_string", header: "tox/tox.h".}
 ##
 ##  @brief Add a friend to the friend list and send a friend request.
 ##
@@ -1260,7 +1264,7 @@ proc tox_err_friend_add_to_string*(value: Tox_Err_Friend_Add): cstring {.
 proc tox_friend_add*(tox: ptr Tox; address: array[TOX_ADDRESS_SIZE, uint8];
                     message: ptr uint8; length: csize_t;
                     error: ptr Tox_Err_Friend_Add): Tox_Friend_Number {.
-    importc: "tox_friend_add", header: "tox.h".}
+    importc: "tox_friend_add", header: "tox/tox.h".}
 ##
 ##  @brief Add a friend without sending a friend request.
 ##
@@ -1283,11 +1287,11 @@ proc tox_friend_add*(tox: ptr Tox; address: array[TOX_ADDRESS_SIZE, uint8];
 proc tox_friend_add_norequest*(tox: ptr Tox;
                               public_key: array[TOX_PUBLIC_KEY_SIZE, uint8];
                               error: ptr Tox_Err_Friend_Add): Tox_Friend_Number {.
-    importc: "tox_friend_add_norequest", header: "tox.h".}
+    importc: "tox_friend_add_norequest", header: "tox/tox.h".}
 type                          ##
     ##  The function returned successfully.
     ##
-  Tox_Err_Friend_Delete* {.size: sizeof(cint).} = enum
+  Tox_Err_Friend_Delete* {.size: sizeof(cint), importc: "Tox_Err_Friend_Delete", header: "tox/tox.h".} = enum
     TOX_ERR_FRIEND_DELETE_OK, ##
                              ##  There was no friend with the given friend number. No friends were
                              ##  deleted.
@@ -1296,7 +1300,7 @@ type                          ##
 
 
 proc tox_err_friend_delete_to_string*(value: Tox_Err_Friend_Delete): cstring {.
-    importc: "tox_err_friend_delete_to_string", header: "tox.h".}
+    importc: "tox_err_friend_delete_to_string", header: "tox/tox.h".}
 ##
 ##  @brief Remove a friend from the friend list.
 ##
@@ -1311,7 +1315,7 @@ proc tox_err_friend_delete_to_string*(value: Tox_Err_Friend_Delete): cstring {.
 
 proc tox_friend_delete*(tox: ptr Tox; friend_number: Tox_Friend_Number;
                        error: ptr Tox_Err_Friend_Delete): bool {.
-    importc: "tox_friend_delete", header: "tox.h".}
+    importc: "tox_friend_delete", header: "tox/tox.h".}
 ##  @}
 ##  @{
 ##  @name Friend list queries
@@ -1320,7 +1324,7 @@ proc tox_friend_delete*(tox: ptr Tox; friend_number: Tox_Friend_Number;
 type                          ##
     ##  The function returned successfully.
     ##
-  Tox_Err_Friend_By_Public_Key* {.size: sizeof(cint).} = enum
+  Tox_Err_Friend_By_Public_Key* {.size: sizeof(cint), importc: "Tox_Err_Friend_By_Public_Key", header: "tox/tox.h".} = enum
     TOX_ERR_FRIEND_BY_PUBLIC_KEY_OK, ##
                                     ##  One of the arguments to the function was NULL when it was not expected.
                                     ##
@@ -1331,7 +1335,7 @@ type                          ##
 
 
 proc tox_err_friend_by_public_key_to_string*(value: Tox_Err_Friend_By_Public_Key): cstring {.
-    importc: "tox_err_friend_by_public_key_to_string", header: "tox.h".}
+    importc: "tox_err_friend_by_public_key_to_string", header: "tox/tox.h".}
 ##
 ##  @brief Return the friend number associated with that Public Key.
 ##
@@ -1343,14 +1347,14 @@ proc tox_err_friend_by_public_key_to_string*(value: Tox_Err_Friend_By_Public_Key
 proc tox_friend_by_public_key*(tox: ptr Tox;
                               public_key: array[TOX_PUBLIC_KEY_SIZE, uint8];
                               error: ptr Tox_Err_Friend_By_Public_Key): Tox_Friend_Number {.
-    importc: "tox_friend_by_public_key", header: "tox.h".}
+    importc: "tox_friend_by_public_key", header: "tox/tox.h".}
 ##
 ##  @brief Checks if a friend with the given friend number exists and returns
 ##    true if it does.
 ##
 
 proc tox_friend_exists*(tox: ptr Tox; friend_number: Tox_Friend_Number): bool {.
-    importc: "tox_friend_exists", header: "tox.h".}
+    importc: "tox_friend_exists", header: "tox/tox.h".}
 ##
 ##  @brief Return the number of friends on the friend list.
 ##
@@ -1359,7 +1363,7 @@ proc tox_friend_exists*(tox: ptr Tox; friend_number: Tox_Friend_Number): bool {.
 ##
 
 proc tox_self_get_friend_list_size*(tox: ptr Tox): csize_t {.
-    importc: "tox_self_get_friend_list_size", header: "tox.h".}
+    importc: "tox_self_get_friend_list_size", header: "tox/tox.h".}
 ##
 ##  @brief Copy a list of valid friend numbers into an array.
 ##
@@ -1371,11 +1375,11 @@ proc tox_self_get_friend_list_size*(tox: ptr Tox): csize_t {.
 ##
 
 proc tox_self_get_friend_list*(tox: ptr Tox; friend_list: ptr Tox_Friend_Number) {.
-    importc: "tox_self_get_friend_list", header: "tox.h".}
+    importc: "tox_self_get_friend_list", header: "tox/tox.h".}
 type                          ##
     ##  The function returned successfully.
     ##
-  Tox_Err_Friend_Get_Public_Key* {.size: sizeof(cint).} = enum
+  Tox_Err_Friend_Get_Public_Key* {.size: sizeof(cint), importc: "Tox_Err_Friend_Get_Public_Key", header: "tox/tox.h".} = enum
     TOX_ERR_FRIEND_GET_PUBLIC_KEY_OK, ##
                                      ##  No friend with the given number exists on the friend list.
                                      ##
@@ -1384,7 +1388,7 @@ type                          ##
 
 proc tox_err_friend_get_public_key_to_string*(
     value: Tox_Err_Friend_Get_Public_Key): cstring {.
-    importc: "tox_err_friend_get_public_key_to_string", header: "tox.h".}
+    importc: "tox_err_friend_get_public_key_to_string", header: "tox/tox.h".}
 ##
 ##  @brief Copies the Public Key associated with a given friend number to a byte
 ##    array.
@@ -1399,11 +1403,11 @@ proc tox_err_friend_get_public_key_to_string*(
 proc tox_friend_get_public_key*(tox: ptr Tox; friend_number: Tox_Friend_Number;
                                public_key: array[TOX_PUBLIC_KEY_SIZE, uint8];
                                error: ptr Tox_Err_Friend_Get_Public_Key): bool {.
-    importc: "tox_friend_get_public_key", header: "tox.h".}
+    importc: "tox_friend_get_public_key", header: "tox/tox.h".}
 type                          ##
     ##  The function returned successfully.
     ##
-  Tox_Err_Friend_Get_Last_Online* {.size: sizeof(cint).} = enum
+  Tox_Err_Friend_Get_Last_Online* {.size: sizeof(cint), importc: "Tox_Err_Friend_Get_Last_Online", header: "tox/tox.h".} = enum
     TOX_ERR_FRIEND_GET_LAST_ONLINE_OK, ##
                                       ##  No friend with the given number exists on the friend list.
                                       ##
@@ -1412,7 +1416,7 @@ type                          ##
 
 proc tox_err_friend_get_last_online_to_string*(
     value: Tox_Err_Friend_Get_Last_Online): cstring {.
-    importc: "tox_err_friend_get_last_online_to_string", header: "tox.h".}
+    importc: "tox_err_friend_get_last_online_to_string", header: "tox/tox.h".}
 ##
 ##  @brief Return a unix-time timestamp of the last time the friend associated
 ##    with a given friend number was seen online.
@@ -1424,7 +1428,7 @@ proc tox_err_friend_get_last_online_to_string*(
 
 proc tox_friend_get_last_online*(tox: ptr Tox; friend_number: Tox_Friend_Number;
                                 error: ptr Tox_Err_Friend_Get_Last_Online): uint64 {.
-    importc: "tox_friend_get_last_online", header: "tox.h".}
+    importc: "tox_friend_get_last_online", header: "tox/tox.h".}
 ##  @}
 ##  @{
 ##  @name Friend-specific state queries (can also be received through callbacks)
@@ -1436,7 +1440,7 @@ proc tox_friend_get_last_online*(tox: ptr Tox; friend_number: Tox_Friend_Number;
 type                          ##
     ##  The function returned successfully.
     ##
-  Tox_Err_Friend_Query* {.size: sizeof(cint).} = enum
+  Tox_Err_Friend_Query* {.size: sizeof(cint), importc: "Tox_Err_Friend_Query", header: "tox/tox.h".} = enum
     TOX_ERR_FRIEND_QUERY_OK, ##
                             ##  The pointer parameter for storing the query result (name, message) was
                             ##  NULL. Unlike the `_self_` variants of these functions, which have no
@@ -1450,7 +1454,7 @@ type                          ##
 
 
 proc tox_err_friend_query_to_string*(value: Tox_Err_Friend_Query): cstring {.
-    importc: "tox_err_friend_query_to_string", header: "tox.h".}
+    importc: "tox_err_friend_query_to_string", header: "tox/tox.h".}
 ##
 ##  @brief Return the length of the friend's name.
 ##
@@ -1462,7 +1466,7 @@ proc tox_err_friend_query_to_string*(value: Tox_Err_Friend_Query): cstring {.
 
 proc tox_friend_get_name_size*(tox: ptr Tox; friend_number: Tox_Friend_Number;
                               error: ptr Tox_Err_Friend_Query): csize_t {.
-    importc: "tox_friend_get_name_size", header: "tox.h".}
+    importc: "tox_friend_get_name_size", header: "tox/tox.h".}
 ##
 ##  @brief Write the name of the friend designated by the given friend number to
 ##    a byte array.
@@ -1480,7 +1484,7 @@ proc tox_friend_get_name_size*(tox: ptr Tox; friend_number: Tox_Friend_Number;
 
 proc tox_friend_get_name*(tox: ptr Tox; friend_number: Tox_Friend_Number;
                          name: ptr uint8; error: ptr Tox_Err_Friend_Query): bool {.
-    importc: "tox_friend_get_name", header: "tox.h".}
+    importc: "tox_friend_get_name", header: "tox/tox.h".}
 ##
 ##  @param friend_number The friend number of the friend whose name changed.
 ##  @param name A byte array containing the same data as
@@ -1502,7 +1506,7 @@ type
 ##
 
 proc tox_callback_friend_name*(tox: ptr Tox; callback: ptr tox_friend_name_cb) {.
-    importc: "tox_callback_friend_name", header: "tox.h".}
+    importc: "tox_callback_friend_name", header: "tox/tox.h".}
 ##
 ##  @brief Return the length of the friend's status message.
 ##
@@ -1512,7 +1516,7 @@ proc tox_callback_friend_name*(tox: ptr Tox; callback: ptr tox_friend_name_cb) {
 proc tox_friend_get_status_message_size*(tox: ptr Tox;
                                         friend_number: Tox_Friend_Number;
                                         error: ptr Tox_Err_Friend_Query): csize_t {.
-    importc: "tox_friend_get_status_message_size", header: "tox.h".}
+    importc: "tox_friend_get_status_message_size", header: "tox/tox.h".}
 ##
 ##  @brief Write the status message of the friend designated by the given friend
 ##    number to a byte array.
@@ -1530,7 +1534,7 @@ proc tox_friend_get_status_message_size*(tox: ptr Tox;
 proc tox_friend_get_status_message*(tox: ptr Tox; friend_number: Tox_Friend_Number;
                                    status_message: ptr uint8;
                                    error: ptr Tox_Err_Friend_Query): bool {.
-    importc: "tox_friend_get_status_message", header: "tox.h".}
+    importc: "tox_friend_get_status_message", header: "tox/tox.h".}
 ##
 ##  @param friend_number The friend number of the friend whose status message
 ##    changed.
@@ -1556,7 +1560,7 @@ type
 ##
 
 proc tox_callback_friend_status_message*(tox: ptr Tox; callback: ptr tox_friend_status_message_cb) {.
-    importc: "tox_callback_friend_status_message", header: "tox.h".}
+    importc: "tox_callback_friend_status_message", header: "tox/tox.h".}
 ##
 ##  @brief Return the friend's user status (away/busy/...).
 ##
@@ -1571,7 +1575,7 @@ proc tox_callback_friend_status_message*(tox: ptr Tox; callback: ptr tox_friend_
 
 proc tox_friend_get_status*(tox: ptr Tox; friend_number: Tox_Friend_Number;
                            error: ptr Tox_Err_Friend_Query): Tox_User_Status {.
-    importc: "tox_friend_get_status", header: "tox.h".}
+    importc: "tox_friend_get_status", header: "tox/tox.h".}
 ##
 ##  @param friend_number The friend number of the friend whose user status
 ##    changed.
@@ -1591,7 +1595,7 @@ type
 ##
 
 proc tox_callback_friend_status*(tox: ptr Tox; callback: ptr tox_friend_status_cb) {.
-    importc: "tox_callback_friend_status", header: "tox.h".}
+    importc: "tox_callback_friend_status", header: "tox/tox.h".}
 ##
 ##  @brief Check whether a friend is currently connected to this client.
 ##
@@ -1611,7 +1615,7 @@ proc tox_callback_friend_status*(tox: ptr Tox; callback: ptr tox_friend_status_c
 proc tox_friend_get_connection_status*(tox: ptr Tox;
                                       friend_number: Tox_Friend_Number;
                                       error: ptr Tox_Err_Friend_Query): Tox_Connection {.
-    importc: "tox_friend_get_connection_status", header: "tox.h".}
+    importc: "tox_friend_get_connection_status", header: "tox/tox.h".}
 ##
 ##  @param friend_number The friend number of the friend whose connection status
 ##    changed.
@@ -1638,8 +1642,8 @@ type
 ##
 
 proc tox_callback_friend_connection_status*(tox: ptr Tox;
-    callback: ptr tox_friend_connection_status_cb) {.
-    importc: "tox_callback_friend_connection_status", header: "tox.h".}
+    callback: tox_friend_connection_status_cb) {.
+    importc: "tox_callback_friend_connection_status", header: "tox/tox.h".}
 ##
 ##  @brief Check whether a friend is currently typing a message.
 ##
@@ -1655,7 +1659,7 @@ proc tox_callback_friend_connection_status*(tox: ptr Tox;
 
 proc tox_friend_get_typing*(tox: ptr Tox; friend_number: Tox_Friend_Number;
                            error: ptr Tox_Err_Friend_Query): bool {.
-    importc: "tox_friend_get_typing", header: "tox.h".}
+    importc: "tox_friend_get_typing", header: "tox/tox.h".}
 ##
 ##  @param friend_number The friend number of the friend who started or stopped
 ##    typing.
@@ -1676,7 +1680,7 @@ type
 ##
 
 proc tox_callback_friend_typing*(tox: ptr Tox; callback: ptr tox_friend_typing_cb) {.
-    importc: "tox_callback_friend_typing", header: "tox.h".}
+    importc: "tox_callback_friend_typing", header: "tox/tox.h".}
 ##  @}
 ##  @{
 ##  @name Sending private messages
@@ -1685,7 +1689,7 @@ proc tox_callback_friend_typing*(tox: ptr Tox; callback: ptr tox_friend_typing_c
 type                          ##
     ##  The function returned successfully.
     ##
-  Tox_Err_Set_Typing* {.size: sizeof(cint).} = enum
+  Tox_Err_Set_Typing* {.size: sizeof(cint), importc: "Tox_Err_Set_Typing", header: "tox/tox.h".} = enum
     TOX_ERR_SET_TYPING_OK, ##
                           ##  The friend number did not designate a valid friend.
                           ##
@@ -1693,7 +1697,7 @@ type                          ##
 
 
 proc tox_err_set_typing_to_string*(value: Tox_Err_Set_Typing): cstring {.
-    importc: "tox_err_set_typing_to_string", header: "tox.h".}
+    importc: "tox_err_set_typing_to_string", header: "tox/tox.h".}
 ##
 ##  @brief Set the client's typing status for a friend.
 ##
@@ -1707,11 +1711,11 @@ proc tox_err_set_typing_to_string*(value: Tox_Err_Set_Typing): cstring {.
 
 proc tox_self_set_typing*(tox: ptr Tox; friend_number: Tox_Friend_Number;
                          typing: bool; error: ptr Tox_Err_Set_Typing): bool {.
-    importc: "tox_self_set_typing", header: "tox.h".}
+    importc: "tox_self_set_typing", header: "tox/tox.h".}
 type                          ##
     ##  The function returned successfully.
     ##
-  Tox_Err_Friend_Send_Message* {.size: sizeof(cint).} = enum
+  Tox_Err_Friend_Send_Message* {.size: sizeof(cint), importc: "Tox_Err_Friend_Send_Message", header: "tox/tox.h".} = enum
     TOX_ERR_FRIEND_SEND_MESSAGE_OK, ##
                                    ##  One of the arguments to the function was NULL when it was not expected.
                                    ##
@@ -1734,7 +1738,7 @@ type                          ##
 
 
 proc tox_err_friend_send_message_to_string*(value: Tox_Err_Friend_Send_Message): cstring {.
-    importc: "tox_err_friend_send_message_to_string", header: "tox.h".}
+    importc: "tox_err_friend_send_message_to_string", header: "tox/tox.h".}
 type
   Tox_Friend_Message_Id* = uint32
 
@@ -1767,7 +1771,7 @@ proc tox_friend_send_message*(tox: ptr Tox; friend_number: Tox_Friend_Number;
                              `type`: Tox_Message_Type; message: ptr uint8;
                              length: csize_t;
                              error: ptr Tox_Err_Friend_Send_Message): Tox_Friend_Message_Id {.
-    importc: "tox_friend_send_message", header: "tox.h".}
+    importc: "tox_friend_send_message", header: "tox/tox.h".}
 ##
 ##  @param friend_number The friend number of the friend who received the
 ##    message.
@@ -1791,7 +1795,7 @@ type
 
 proc tox_callback_friend_read_receipt*(tox: ptr Tox;
                                       callback: ptr tox_friend_read_receipt_cb) {.
-    importc: "tox_callback_friend_read_receipt", header: "tox.h".}
+    importc: "tox_callback_friend_read_receipt", header: "tox/tox.h".}
 ##  @}
 ##  @{
 ##  @name Receiving private messages and friend requests
@@ -1815,8 +1819,8 @@ type
 ##  This event is triggered when a friend request is received.
 ##
 
-proc tox_callback_friend_request*(tox: ptr Tox; callback: ptr tox_friend_request_cb) {.
-    importc: "tox_callback_friend_request", header: "tox.h".}
+proc tox_callback_friend_request*(tox: ptr Tox; callback: tox_friend_request_cb) {.
+    importc: "tox_callback_friend_request", header: "tox/tox.h".}
 ##
 ##  @param friend_number The friend number of the friend who sent the message.
 ##  @param type The type of the message (normal, action, ...).
@@ -1838,7 +1842,7 @@ type
 ##
 
 proc tox_callback_friend_message*(tox: ptr Tox; callback: ptr tox_friend_message_cb) {.
-    importc: "tox_callback_friend_message", header: "tox.h".}
+    importc: "tox_callback_friend_message", header: "tox/tox.h".}
 ##  @}
 ##  @{
 ##  @name File transmission: common between sending and receiving
@@ -1868,7 +1872,7 @@ type
 ##
 
 proc tox_hash*(hash: array[TOX_HASH_LENGTH, uint8]; data: ptr uint8; length: csize_t): bool {.
-    importc: "tox_hash", header: "tox.h".}
+    importc: "tox_hash", header: "tox/tox.h".}
 ##
 ##  @brief A list of pre-defined file kinds.
 ##
@@ -1880,7 +1884,7 @@ proc tox_hash*(hash: array[TOX_HASH_LENGTH, uint8]; data: ptr uint8; length: csi
 ##
 
 type
-  Tox_File_Kind* {.size: sizeof(cint).} = enum ##
+  Tox_File_Kind* {.size: sizeof(cint), importc: "Tox_File_Kind", header: "tox/tox.h".} = enum ##
                                           ##  Arbitrary file data. Clients can choose to handle it based on the file
                                           ##  name or magic or any other way they choose.
                                           ##
@@ -1911,7 +1915,7 @@ type ##
     ##  Sent by the receiving side to accept a file send request. Also sent after
     ##  a TOX_FILE_CONTROL_PAUSE command to continue sending or receiving.
     ##
-  Tox_File_Control* {.size: sizeof(cint).} = enum
+  Tox_File_Control* {.size: sizeof(cint), importc: "Tox_File_Control", header: "tox/tox.h".} = enum
     TOX_FILE_CONTROL_RESUME, ##
                             ##  Sent by clients to pause the file transfer. The initial state of a file
                             ##  transfer is always paused on the receiving side and running on the
@@ -1927,11 +1931,11 @@ type ##
 
 
 proc tox_file_control_to_string*(value: Tox_File_Control): cstring {.
-    importc: "tox_file_control_to_string", header: "tox.h".}
+    importc: "tox_file_control_to_string", header: "tox/tox.h".}
 type                          ##
     ##  The function returned successfully.
     ##
-  Tox_Err_File_Control* {.size: sizeof(cint).} = enum
+  Tox_Err_File_Control* {.size: sizeof(cint), importc: "Tox_Err_File_Control", header: "tox/tox.h".} = enum
     TOX_ERR_FILE_CONTROL_OK, ##
                             ##  The friend_number passed did not designate a valid friend.
                             ##
@@ -1959,7 +1963,7 @@ type                          ##
 
 
 proc tox_err_file_control_to_string*(value: Tox_Err_File_Control): cstring {.
-    importc: "tox_err_file_control_to_string", header: "tox.h".}
+    importc: "tox_err_file_control_to_string", header: "tox/tox.h".}
 ##
 ##  @brief Sends a file control command to a friend for a given file transfer.
 ##
@@ -1974,7 +1978,7 @@ proc tox_err_file_control_to_string*(value: Tox_Err_File_Control): cstring {.
 proc tox_file_control*(tox: ptr Tox; friend_number: Tox_Friend_Number;
                       file_number: Tox_File_Number; control: Tox_File_Control;
                       error: ptr Tox_Err_File_Control): bool {.
-    importc: "tox_file_control", header: "tox.h".}
+    importc: "tox_file_control", header: "tox/tox.h".}
 ##
 ##  @brief When receiving TOX_FILE_CONTROL_CANCEL, the client should release the
 ##  resources associated with the file number and consider the transfer failed.
@@ -2001,11 +2005,11 @@ type
 
 proc tox_callback_file_recv_control*(tox: ptr Tox;
                                     callback: ptr tox_file_recv_control_cb) {.
-    importc: "tox_callback_file_recv_control", header: "tox.h".}
+    importc: "tox_callback_file_recv_control", header: "tox/tox.h".}
 type                          ##
     ##  The function returned successfully.
     ##
-  Tox_Err_File_Seek* {.size: sizeof(cint).} = enum
+  Tox_Err_File_Seek* {.size: sizeof(cint), importc: "Tox_Err_File_Seek", header: "tox/tox.h".} = enum
     TOX_ERR_FILE_SEEK_OK, ##
                          ##  The friend_number passed did not designate a valid friend.
                          ##
@@ -2029,7 +2033,7 @@ type                          ##
 
 
 proc tox_err_file_seek_to_string*(value: Tox_Err_File_Seek): cstring {.
-    importc: "tox_err_file_seek_to_string", header: "tox.h".}
+    importc: "tox_err_file_seek_to_string", header: "tox/tox.h".}
 ##
 ##  @brief Sends a file seek control command to a friend for a given file
 ##    transfer.
@@ -2046,11 +2050,11 @@ proc tox_err_file_seek_to_string*(value: Tox_Err_File_Seek): cstring {.
 proc tox_file_seek*(tox: ptr Tox; friend_number: Tox_Friend_Number;
                    file_number: Tox_File_Number; position: uint64;
                    error: ptr Tox_Err_File_Seek): bool {.importc: "tox_file_seek",
-    header: "tox.h".}
+    header: "tox/tox.h".}
 type                          ##
     ##  The function returned successfully.
     ##
-  Tox_Err_File_Get* {.size: sizeof(cint).} = enum
+  Tox_Err_File_Get* {.size: sizeof(cint), importc: "Tox_Err_File_Get", header: "tox/tox.h".} = enum
     TOX_ERR_FILE_GET_OK, ##
                         ##  One of the arguments to the function was NULL when it was not expected.
                         ##
@@ -2065,7 +2069,7 @@ type                          ##
 
 
 proc tox_err_file_get_to_string*(value: Tox_Err_File_Get): cstring {.
-    importc: "tox_err_file_get_to_string", header: "tox.h".}
+    importc: "tox_err_file_get_to_string", header: "tox/tox.h".}
 ##
 ##  @brief Copy the file id associated to the file transfer to a byte array.
 ##
@@ -2082,7 +2086,7 @@ proc tox_file_get_file_id*(tox: ptr Tox; friend_number: Tox_Friend_Number;
                           file_number: Tox_File_Number;
                           file_id: array[TOX_FILE_ID_LENGTH, uint8];
                           error: ptr Tox_Err_File_Get): bool {.
-    importc: "tox_file_get_file_id", header: "tox.h".}
+    importc: "tox_file_get_file_id", header: "tox/tox.h".}
 ##  @}
 ##  @{
 ##  @name File transmission: sending
@@ -2091,7 +2095,7 @@ proc tox_file_get_file_id*(tox: ptr Tox; friend_number: Tox_Friend_Number;
 type                          ##
     ##  The function returned successfully.
     ##
-  Tox_Err_File_Send* {.size: sizeof(cint).} = enum
+  Tox_Err_File_Send* {.size: sizeof(cint), importc: "Tox_Err_File_Send", header: "tox/tox.h".} = enum
     TOX_ERR_FILE_SEND_OK, ##
                          ##  One of the arguments to the function was NULL when it was not expected.
                          ##
@@ -2112,7 +2116,7 @@ type                          ##
 
 
 proc tox_err_file_send_to_string*(value: Tox_Err_File_Send): cstring {.
-    importc: "tox_err_file_send_to_string", header: "tox.h".}
+    importc: "tox_err_file_send_to_string", header: "tox/tox.h".}
 ##
 ##  @brief Send a file transmission request.
 ##
@@ -2178,11 +2182,11 @@ proc tox_file_send*(tox: ptr Tox; friend_number: Tox_Friend_Number; kind: uint32
                    file_size: uint64; file_id: array[TOX_FILE_ID_LENGTH, uint8];
                    filename: ptr uint8; filename_length: csize_t;
                    error: ptr Tox_Err_File_Send): Tox_File_Number {.
-    importc: "tox_file_send", header: "tox.h".}
+    importc: "tox_file_send", header: "tox/tox.h".}
 type                          ##
     ##  The function returned successfully.
     ##
-  Tox_Err_File_Send_Chunk* {.size: sizeof(cint).} = enum
+  Tox_Err_File_Send_Chunk* {.size: sizeof(cint), importc: "Tox_Err_File_Send_Chunk", header: "tox/tox.h".} = enum
     TOX_ERR_FILE_SEND_CHUNK_OK, ##
                                ##  The length parameter was non-zero, but data was NULL.
                                ##
@@ -2217,7 +2221,7 @@ type                          ##
 
 
 proc tox_err_file_send_chunk_to_string*(value: Tox_Err_File_Send_Chunk): cstring {.
-    importc: "tox_err_file_send_chunk_to_string", header: "tox.h".}
+    importc: "tox_err_file_send_chunk_to_string", header: "tox/tox.h".}
 ##
 ##  @brief Send a chunk of file data to a friend.
 ##
@@ -2240,7 +2244,7 @@ proc tox_file_send_chunk*(tox: ptr Tox; friend_number: Tox_Friend_Number;
                          file_number: Tox_File_Number; position: uint64;
                          data: ptr uint8; length: csize_t;
                          error: ptr Tox_Err_File_Send_Chunk): bool {.
-    importc: "tox_file_send_chunk", header: "tox.h".}
+    importc: "tox_file_send_chunk", header: "tox/tox.h".}
 ##
 ##  If the length parameter is 0, the file transfer is finished, and the client's
 ##  resources associated with the file number should be released. After a call
@@ -2279,7 +2283,7 @@ type
 
 proc tox_callback_file_chunk_request*(tox: ptr Tox;
                                      callback: ptr tox_file_chunk_request_cb) {.
-    importc: "tox_callback_file_chunk_request", header: "tox.h".}
+    importc: "tox_callback_file_chunk_request", header: "tox/tox.h".}
 ##  @}
 ##  @{
 ##  @name File transmission: receiving
@@ -2318,7 +2322,7 @@ type
 ##
 
 proc tox_callback_file_recv*(tox: ptr Tox; callback: ptr tox_file_recv_cb) {.
-    importc: "tox_callback_file_recv", header: "tox.h".}
+    importc: "tox_callback_file_recv", header: "tox/tox.h".}
 ##
 ##  When length is 0, the transfer is finished and the client should release the
 ##  resources it acquired for the transfer. After a call with length = 0, the
@@ -2352,7 +2356,7 @@ type
 
 proc tox_callback_file_recv_chunk*(tox: ptr Tox;
                                   callback: ptr tox_file_recv_chunk_cb) {.
-    importc: "tox_callback_file_recv_chunk", header: "tox.h".}
+    importc: "tox_callback_file_recv_chunk", header: "tox/tox.h".}
 ##  @}
 ##  @{
 ##  @name Conference management
@@ -2371,7 +2375,7 @@ type ##
     ##  Text-only conferences that must be accepted with the tox_conference_join
     ##  function.
     ##
-  Tox_Conference_Type* {.size: sizeof(cint).} = enum
+  Tox_Conference_Type* {.size: sizeof(cint), importc: "Tox_Conference_Type", header: "tox/tox.h".} = enum
     TOX_CONFERENCE_TYPE_TEXT, ##
                              ##  Video conference. The function to accept these is in toxav.
                              ##
@@ -2379,7 +2383,7 @@ type ##
 
 
 proc tox_conference_type_to_string*(value: Tox_Conference_Type): cstring {.
-    importc: "tox_conference_type_to_string", header: "tox.h".}
+    importc: "tox_conference_type_to_string", header: "tox/tox.h".}
 ##
 ##  The invitation will remain valid until the inviting friend goes offline
 ##  or exits the conference.
@@ -2406,7 +2410,7 @@ type
 
 proc tox_callback_conference_invite*(tox: ptr Tox;
                                     callback: ptr tox_conference_invite_cb) {.
-    importc: "tox_callback_conference_invite", header: "tox.h".}
+    importc: "tox_callback_conference_invite", header: "tox/tox.h".}
 ##
 ##  @param conference_number The conference number of the conference to which we
 ##    have connected.
@@ -2427,7 +2431,7 @@ type
 ##
 
 proc tox_callback_conference_connected*(tox: ptr Tox; callback: ptr tox_conference_connected_cb) {.
-    importc: "tox_callback_conference_connected", header: "tox.h".}
+    importc: "tox_callback_conference_connected", header: "tox/tox.h".}
 ##
 ##  @param conference_number The conference number of the conference the message
 ##    is intended for.
@@ -2454,7 +2458,7 @@ type
 
 proc tox_callback_conference_message*(tox: ptr Tox;
                                      callback: ptr tox_conference_message_cb) {.
-    importc: "tox_callback_conference_message", header: "tox.h".}
+    importc: "tox_callback_conference_message", header: "tox/tox.h".}
 ##
 ##  @param conference_number The conference number of the conference the title
 ##    change is intended for.
@@ -2482,7 +2486,7 @@ type
 
 proc tox_callback_conference_title*(tox: ptr Tox;
                                    callback: ptr tox_conference_title_cb) {.
-    importc: "tox_callback_conference_title", header: "tox.h".}
+    importc: "tox_callback_conference_title", header: "tox/tox.h".}
 ##
 ##  @param conference_number The conference number of the conference the
 ##    peer is in.
@@ -2507,7 +2511,7 @@ type
 ##
 
 proc tox_callback_conference_peer_name*(tox: ptr Tox; callback: ptr tox_conference_peer_name_cb) {.
-    importc: "tox_callback_conference_peer_name", header: "tox.h".}
+    importc: "tox_callback_conference_peer_name", header: "tox/tox.h".}
 ##
 ##  @param conference_number The conference number of the conference the
 ##    peer is in.
@@ -2527,11 +2531,11 @@ type
 
 proc tox_callback_conference_peer_list_changed*(tox: ptr Tox;
     callback: ptr tox_conference_peer_list_changed_cb) {.
-    importc: "tox_callback_conference_peer_list_changed", header: "tox.h".}
+    importc: "tox_callback_conference_peer_list_changed", header: "tox/tox.h".}
 type                          ##
     ##  The function returned successfully.
     ##
-  Tox_Err_Conference_New* {.size: sizeof(cint).} = enum
+  Tox_Err_Conference_New* {.size: sizeof(cint), importc: "Tox_Err_Conference_New", header: "tox/tox.h".} = enum
     TOX_ERR_CONFERENCE_NEW_OK, ##
                               ##  The conference instance failed to initialize.
                               ##
@@ -2539,7 +2543,7 @@ type                          ##
 
 
 proc tox_err_conference_new_to_string*(value: Tox_Err_Conference_New): cstring {.
-    importc: "tox_err_conference_new_to_string", header: "tox.h".}
+    importc: "tox_err_conference_new_to_string", header: "tox/tox.h".}
 ##
 ##  @brief Creates a new conference.
 ##
@@ -2551,11 +2555,11 @@ proc tox_err_conference_new_to_string*(value: Tox_Err_Conference_New): cstring {
 ##
 
 proc tox_conference_new*(tox: ptr Tox; error: ptr Tox_Err_Conference_New): Tox_Conference_Number {.
-    importc: "tox_conference_new", header: "tox.h".}
+    importc: "tox_conference_new", header: "tox/tox.h".}
 type                          ##
     ##  The function returned successfully.
     ##
-  Tox_Err_Conference_Delete* {.size: sizeof(cint).} = enum
+  Tox_Err_Conference_Delete* {.size: sizeof(cint), importc: "Tox_Err_Conference_Delete", header: "tox/tox.h".} = enum
     TOX_ERR_CONFERENCE_DELETE_OK, ##
                                  ##  The conference number passed did not designate a valid conference.
                                  ##
@@ -2563,7 +2567,7 @@ type                          ##
 
 
 proc tox_err_conference_delete_to_string*(value: Tox_Err_Conference_Delete): cstring {.
-    importc: "tox_err_conference_delete_to_string", header: "tox.h".}
+    importc: "tox_err_conference_delete_to_string", header: "tox/tox.h".}
 ##
 ##  @brief This function deletes a conference.
 ##
@@ -2575,7 +2579,7 @@ proc tox_err_conference_delete_to_string*(value: Tox_Err_Conference_Delete): cst
 
 proc tox_conference_delete*(tox: ptr Tox; conference_number: Tox_Conference_Number;
                            error: ptr Tox_Err_Conference_Delete): bool {.
-    importc: "tox_conference_delete", header: "tox.h".}
+    importc: "tox_conference_delete", header: "tox/tox.h".}
 ##
 ##  @brief Error codes for peer info queries.
 ##
@@ -2583,7 +2587,7 @@ proc tox_conference_delete*(tox: ptr Tox; conference_number: Tox_Conference_Numb
 type                          ##
     ##  The function returned successfully.
     ##
-  Tox_Err_Conference_Peer_Query* {.size: sizeof(cint).} = enum
+  Tox_Err_Conference_Peer_Query* {.size: sizeof(cint), importc: "Tox_Err_Conference_Peer_Query", header: "tox/tox.h".} = enum
     TOX_ERR_CONFERENCE_PEER_QUERY_OK, ##
                                      ##  The conference number passed did not designate a valid conference.
                                      ##
@@ -2598,7 +2602,7 @@ type                          ##
 
 proc tox_err_conference_peer_query_to_string*(
     value: Tox_Err_Conference_Peer_Query): cstring {.
-    importc: "tox_err_conference_peer_query_to_string", header: "tox.h".}
+    importc: "tox_err_conference_peer_query_to_string", header: "tox/tox.h".}
 ##
 ##  @brief Return the number of online peers in the conference.
 ##
@@ -2610,7 +2614,7 @@ proc tox_err_conference_peer_query_to_string*(
 proc tox_conference_peer_count*(tox: ptr Tox;
                                conference_number: Tox_Conference_Number;
                                error: ptr Tox_Err_Conference_Peer_Query): uint32 {.
-    importc: "tox_conference_peer_count", header: "tox.h".}
+    importc: "tox_conference_peer_count", header: "tox/tox.h".}
 ##
 ##  @brief Return the length of the peer's name.
 ##
@@ -2620,7 +2624,7 @@ proc tox_conference_peer_count*(tox: ptr Tox;
 proc tox_conference_peer_get_name_size*(tox: ptr Tox; conference_number: Tox_Conference_Number;
                                        peer_number: Tox_Conference_Peer_Number;
                                        error: ptr Tox_Err_Conference_Peer_Query): csize_t {.
-    importc: "tox_conference_peer_get_name_size", header: "tox.h".}
+    importc: "tox_conference_peer_get_name_size", header: "tox/tox.h".}
 ##
 ##  @brief Copy the name of peer_number who is in conference_number to name.
 ##
@@ -2637,7 +2641,7 @@ proc tox_conference_peer_get_name*(tox: ptr Tox;
                                   peer_number: Tox_Conference_Peer_Number;
                                   name: ptr uint8;
                                   error: ptr Tox_Err_Conference_Peer_Query): bool {.
-    importc: "tox_conference_peer_get_name", header: "tox.h".}
+    importc: "tox_conference_peer_get_name", header: "tox/tox.h".}
 ##
 ##  @brief Copy the public key of peer_number who is in conference_number to
 ##    public_key.
@@ -2650,14 +2654,14 @@ proc tox_conference_peer_get_name*(tox: ptr Tox;
 proc tox_conference_peer_get_public_key*(tox: ptr Tox; conference_number: Tox_Conference_Number;
     peer_number: Tox_Conference_Peer_Number; public_key: array[TOX_PUBLIC_KEY_SIZE,
     uint8]; error: ptr Tox_Err_Conference_Peer_Query): bool {.
-    importc: "tox_conference_peer_get_public_key", header: "tox.h".}
+    importc: "tox_conference_peer_get_public_key", header: "tox/tox.h".}
 ##
 ##  @brief Return true if passed peer_number corresponds to our own.
 ##
 
 proc tox_conference_peer_number_is_ours*(tox: ptr Tox; conference_number: Tox_Conference_Number;
     peer_number: Tox_Conference_Peer_Number; error: ptr Tox_Err_Conference_Peer_Query): bool {.
-    importc: "tox_conference_peer_number_is_ours", header: "tox.h".}
+    importc: "tox_conference_peer_number_is_ours", header: "tox/tox.h".}
 ##
 ##  @brief Return the number of offline peers in the conference.
 ##
@@ -2669,7 +2673,7 @@ proc tox_conference_peer_number_is_ours*(tox: ptr Tox; conference_number: Tox_Co
 
 proc tox_conference_offline_peer_count*(tox: ptr Tox; conference_number: Tox_Conference_Number;
                                        error: ptr Tox_Err_Conference_Peer_Query): uint32 {.
-    importc: "tox_conference_offline_peer_count", header: "tox.h".}
+    importc: "tox_conference_offline_peer_count", header: "tox/tox.h".}
 ##
 ##  @brief Return the length of the offline peer's name.
 ##
@@ -2680,7 +2684,7 @@ proc tox_conference_offline_peer_get_name_size*(tox: ptr Tox;
     conference_number: Tox_Conference_Number;
     offline_peer_number: Tox_Conference_Offline_Peer_Number;
     error: ptr Tox_Err_Conference_Peer_Query): csize_t {.
-    importc: "tox_conference_offline_peer_get_name_size", header: "tox.h".}
+    importc: "tox_conference_offline_peer_get_name_size", header: "tox/tox.h".}
 ##
 ##  @brief Copy the name of offline_peer_number who is in conference_number to
 ##    name.
@@ -2697,7 +2701,7 @@ proc tox_conference_offline_peer_get_name*(tox: ptr Tox;
     conference_number: Tox_Conference_Number;
     offline_peer_number: Tox_Conference_Offline_Peer_Number; name: ptr uint8;
     error: ptr Tox_Err_Conference_Peer_Query): bool {.
-    importc: "tox_conference_offline_peer_get_name", header: "tox.h".}
+    importc: "tox_conference_offline_peer_get_name", header: "tox/tox.h".}
 ##
 ##  @brief Copy the public key of offline_peer_number who is in conference_number
 ##    to public_key.
@@ -2712,7 +2716,7 @@ proc tox_conference_offline_peer_get_public_key*(tox: ptr Tox;
     offline_peer_number: Tox_Conference_Offline_Peer_Number;
     public_key: array[TOX_PUBLIC_KEY_SIZE, uint8];
     error: ptr Tox_Err_Conference_Peer_Query): bool {.
-    importc: "tox_conference_offline_peer_get_public_key", header: "tox.h".}
+    importc: "tox_conference_offline_peer_get_public_key", header: "tox/tox.h".}
 ##
 ##  @brief Return a unix-time timestamp of the last time offline_peer_number was
 ##    seen to be active.
@@ -2722,11 +2726,11 @@ proc tox_conference_offline_peer_get_last_active*(tox: ptr Tox;
     conference_number: Tox_Conference_Number;
     offline_peer_number: Tox_Conference_Offline_Peer_Number;
     error: ptr Tox_Err_Conference_Peer_Query): uint64 {.
-    importc: "tox_conference_offline_peer_get_last_active", header: "tox.h".}
+    importc: "tox_conference_offline_peer_get_last_active", header: "tox/tox.h".}
 type                          ##
     ##  The function returned successfully.
     ##
-  Tox_Err_Conference_Set_Max_Offline* {.size: sizeof(cint).} = enum
+  Tox_Err_Conference_Set_Max_Offline* {.size: sizeof(cint), importc: "Tox_Err_Conference_Set_Max_Offline", header: "tox/tox.h".} = enum
     TOX_ERR_CONFERENCE_SET_MAX_OFFLINE_OK, ##
                                           ##  The conference number passed did not designate a valid conference.
                                           ##
@@ -2735,7 +2739,7 @@ type                          ##
 
 proc tox_err_conference_set_max_offline_to_string*(
     value: Tox_Err_Conference_Set_Max_Offline): cstring {.
-    importc: "tox_err_conference_set_max_offline_to_string", header: "tox.h".}
+    importc: "tox_err_conference_set_max_offline_to_string", header: "tox/tox.h".}
 ##
 ##  @brief Set maximum number of offline peers to store, overriding the default.
 ##
@@ -2743,11 +2747,11 @@ proc tox_err_conference_set_max_offline_to_string*(
 proc tox_conference_set_max_offline*(tox: ptr Tox;
                                     conference_number: Tox_Conference_Number;
                                     max_offline: uint32; error: ptr Tox_Err_Conference_Set_Max_Offline): bool {.
-    importc: "tox_conference_set_max_offline", header: "tox.h".}
+    importc: "tox_conference_set_max_offline", header: "tox/tox.h".}
 type                          ##
     ##  The function returned successfully.
     ##
-  Tox_Err_Conference_Invite* {.size: sizeof(cint).} = enum
+  Tox_Err_Conference_Invite* {.size: sizeof(cint), importc: "Tox_Err_Conference_Invite", header: "tox/tox.h".} = enum
     TOX_ERR_CONFERENCE_INVITE_OK, ##
                                  ##  The conference number passed did not designate a valid conference.
                                  ##
@@ -2761,7 +2765,7 @@ type                          ##
 
 
 proc tox_err_conference_invite_to_string*(value: Tox_Err_Conference_Invite): cstring {.
-    importc: "tox_err_conference_invite_to_string", header: "tox.h".}
+    importc: "tox_err_conference_invite_to_string", header: "tox/tox.h".}
 ##
 ##  @brief Invites a friend to a conference.
 ##
@@ -2775,11 +2779,11 @@ proc tox_err_conference_invite_to_string*(value: Tox_Err_Conference_Invite): cst
 proc tox_conference_invite*(tox: ptr Tox; friend_number: Tox_Friend_Number;
                            conference_number: Tox_Conference_Number;
                            error: ptr Tox_Err_Conference_Invite): bool {.
-    importc: "tox_conference_invite", header: "tox.h".}
+    importc: "tox_conference_invite", header: "tox/tox.h".}
 type                          ##
     ##  The function returned successfully.
     ##
-  Tox_Err_Conference_Join* {.size: sizeof(cint).} = enum
+  Tox_Err_Conference_Join* {.size: sizeof(cint), importc: "Tox_Err_Conference_Join", header: "tox/tox.h".} = enum
     TOX_ERR_CONFERENCE_JOIN_OK, ##
                                ##  The cookie passed has an invalid length.
                                ##
@@ -2803,7 +2807,7 @@ type                          ##
 
 
 proc tox_err_conference_join_to_string*(value: Tox_Err_Conference_Join): cstring {.
-    importc: "tox_err_conference_join_to_string", header: "tox.h".}
+    importc: "tox_err_conference_join_to_string", header: "tox/tox.h".}
 ##
 ##  @brief Joins a conference that the client has been invited to.
 ##
@@ -2825,11 +2829,11 @@ proc tox_err_conference_join_to_string*(value: Tox_Err_Conference_Join): cstring
 proc tox_conference_join*(tox: ptr Tox; friend_number: Tox_Friend_Number;
                          cookie: ptr uint8; length: csize_t;
                          error: ptr Tox_Err_Conference_Join): Tox_Conference_Number {.
-    importc: "tox_conference_join", header: "tox.h".}
+    importc: "tox_conference_join", header: "tox/tox.h".}
 type                          ##
     ##  The function returned successfully.
     ##
-  Tox_Err_Conference_Send_Message* {.size: sizeof(cint).} = enum
+  Tox_Err_Conference_Send_Message* {.size: sizeof(cint), importc: "Tox_Err_Conference_Send_Message", header: "tox/tox.h".} = enum
     TOX_ERR_CONFERENCE_SEND_MESSAGE_OK, ##
                                        ##  The conference number passed did not designate a valid conference.
                                        ##
@@ -2847,7 +2851,7 @@ type                          ##
 
 proc tox_err_conference_send_message_to_string*(
     value: Tox_Err_Conference_Send_Message): cstring {.
-    importc: "tox_err_conference_send_message_to_string", header: "tox.h".}
+    importc: "tox_err_conference_send_message_to_string", header: "tox/tox.h".}
 ##
 ##  @brief Send a text chat message to the conference.
 ##
@@ -2873,11 +2877,11 @@ proc tox_conference_send_message*(tox: ptr Tox;
                                  `type`: Tox_Message_Type; message: ptr uint8;
                                  length: csize_t;
                                  error: ptr Tox_Err_Conference_Send_Message): bool {.
-    importc: "tox_conference_send_message", header: "tox.h".}
+    importc: "tox_conference_send_message", header: "tox/tox.h".}
 type                          ##
     ##  The function returned successfully.
     ##
-  Tox_Err_Conference_Title* {.size: sizeof(cint).} = enum
+  Tox_Err_Conference_Title* {.size: sizeof(cint), importc: "Tox_Err_Conference_Title", header: "tox/tox.h".} = enum
     TOX_ERR_CONFERENCE_TITLE_OK, ##
                                 ##  The conference number passed did not designate a valid conference.
                                 ##
@@ -2891,7 +2895,7 @@ type                          ##
 
 
 proc tox_err_conference_title_to_string*(value: Tox_Err_Conference_Title): cstring {.
-    importc: "tox_err_conference_title_to_string", header: "tox.h".}
+    importc: "tox_err_conference_title_to_string", header: "tox/tox.h".}
 ##
 ##  @brief Return the length of the conference title.
 ##
@@ -2904,7 +2908,7 @@ proc tox_err_conference_title_to_string*(value: Tox_Err_Conference_Title): cstri
 proc tox_conference_get_title_size*(tox: ptr Tox;
                                    conference_number: Tox_Conference_Number;
                                    error: ptr Tox_Err_Conference_Title): csize_t {.
-    importc: "tox_conference_get_title_size", header: "tox.h".}
+    importc: "tox_conference_get_title_size", header: "tox/tox.h".}
 ##
 ##  @brief Write the title designated by the given conference number to a byte
 ##    array.
@@ -2924,7 +2928,7 @@ proc tox_conference_get_title_size*(tox: ptr Tox;
 proc tox_conference_get_title*(tox: ptr Tox;
                               conference_number: Tox_Conference_Number;
                               title: ptr uint8; error: ptr Tox_Err_Conference_Title): bool {.
-    importc: "tox_conference_get_title", header: "tox.h".}
+    importc: "tox_conference_get_title", header: "tox/tox.h".}
 ##
 ##  @brief Set the conference title and broadcast it to the rest of the
 ##    conference.
@@ -2938,7 +2942,7 @@ proc tox_conference_set_title*(tox: ptr Tox;
                               conference_number: Tox_Conference_Number;
                               title: ptr uint8; length: csize_t;
                               error: ptr Tox_Err_Conference_Title): bool {.
-    importc: "tox_conference_set_title", header: "tox.h".}
+    importc: "tox_conference_set_title", header: "tox/tox.h".}
 ##
 ##  @brief Return the number of conferences in the Tox instance.
 ##
@@ -2947,7 +2951,7 @@ proc tox_conference_set_title*(tox: ptr Tox;
 ##
 
 proc tox_conference_get_chatlist_size*(tox: ptr Tox): csize_t {.
-    importc: "tox_conference_get_chatlist_size", header: "tox.h".}
+    importc: "tox_conference_get_chatlist_size", header: "tox/tox.h".}
 ##
 ##  @brief Copy a list of valid conference numbers into the array chatlist.
 ##
@@ -2964,7 +2968,7 @@ proc tox_conference_get_chatlist_size*(tox: ptr Tox): csize_t {.
 ##
 
 proc tox_conference_get_chatlist*(tox: ptr Tox; chatlist: ptr Tox_Conference_Number) {.
-    importc: "tox_conference_get_chatlist", header: "tox.h".}
+    importc: "tox_conference_get_chatlist", header: "tox/tox.h".}
 ##
 ##  @brief Returns the type of conference (Tox_Conference_Type) that
 ##    conference_number is.
@@ -2975,7 +2979,7 @@ proc tox_conference_get_chatlist*(tox: ptr Tox; chatlist: ptr Tox_Conference_Num
 type                          ##
     ##  The function returned successfully.
     ##
-  Tox_Err_Conference_Get_Type* {.size: sizeof(cint).} = enum
+  Tox_Err_Conference_Get_Type* {.size: sizeof(cint), importc: "Tox_Err_Conference_Get_Type", header: "tox/tox.h".} = enum
     TOX_ERR_CONFERENCE_GET_TYPE_OK, ##
                                    ##  The conference number passed did not designate a valid conference.
                                    ##
@@ -2983,7 +2987,7 @@ type                          ##
 
 
 proc tox_err_conference_get_type_to_string*(value: Tox_Err_Conference_Get_Type): cstring {.
-    importc: "tox_err_conference_get_type_to_string", header: "tox.h".}
+    importc: "tox_err_conference_get_type_to_string", header: "tox/tox.h".}
 ##
 ##  @brief Get the type (text or A/V) for the conference.
 ##
@@ -2991,7 +2995,7 @@ proc tox_err_conference_get_type_to_string*(value: Tox_Err_Conference_Get_Type):
 proc tox_conference_get_type*(tox: ptr Tox;
                              conference_number: Tox_Conference_Number;
                              error: ptr Tox_Err_Conference_Get_Type): Tox_Conference_Type {.
-    importc: "tox_conference_get_type", header: "tox.h".}
+    importc: "tox_conference_get_type", header: "tox/tox.h".}
 ##
 ##  @brief Get the conference unique ID.
 ##
@@ -3004,11 +3008,11 @@ proc tox_conference_get_type*(tox: ptr Tox;
 
 proc tox_conference_get_id*(tox: ptr Tox; conference_number: Tox_Conference_Number;
                            id: array[TOX_CONFERENCE_ID_SIZE, uint8]): bool {.
-    importc: "tox_conference_get_id", header: "tox.h".}
+    importc: "tox_conference_get_id", header: "tox/tox.h".}
 type                          ##
     ##  The function returned successfully.
     ##
-  Tox_Err_Conference_By_Id* {.size: sizeof(cint).} = enum
+  Tox_Err_Conference_By_Id* {.size: sizeof(cint), importc: "Tox_Err_Conference_By_Id", header: "tox/tox.h".} = enum
     TOX_ERR_CONFERENCE_BY_ID_OK, ##
                                 ##  One of the arguments to the function was NULL when it was not expected.
                                 ##
@@ -3019,7 +3023,7 @@ type                          ##
 
 
 proc tox_err_conference_by_id_to_string*(value: Tox_Err_Conference_By_Id): cstring {.
-    importc: "tox_err_conference_by_id_to_string", header: "tox.h".}
+    importc: "tox_err_conference_by_id_to_string", header: "tox/tox.h".}
 ##
 ##  @brief Return the conference number associated with the specified id.
 ##
@@ -3030,7 +3034,7 @@ proc tox_err_conference_by_id_to_string*(value: Tox_Err_Conference_By_Id): cstri
 
 proc tox_conference_by_id*(tox: ptr Tox; id: array[TOX_CONFERENCE_ID_SIZE, uint8];
                           error: ptr Tox_Err_Conference_By_Id): Tox_Conference_Number {.
-    importc: "tox_conference_by_id", header: "tox.h".}
+    importc: "tox_conference_by_id", header: "tox/tox.h".}
 ##
 ##  @brief Get the conference unique ID.
 ##
@@ -3046,11 +3050,11 @@ proc tox_conference_by_id*(tox: ptr Tox; id: array[TOX_CONFERENCE_ID_SIZE, uint8
 
 proc tox_conference_get_uid*(tox: ptr Tox; conference_number: Tox_Conference_Number;
                             uid: array[TOX_CONFERENCE_UID_SIZE, uint8]): bool {.
-    importc: "tox_conference_get_uid", header: "tox.h".}
+    importc: "tox_conference_get_uid", header: "tox/tox.h".}
 type                          ##
     ##  The function returned successfully.
     ##
-  Tox_Err_Conference_By_Uid* {.size: sizeof(cint).} = enum
+  Tox_Err_Conference_By_Uid* {.size: sizeof(cint), importc: "Tox_Err_Conference_By_Uid", header: "tox/tox.h".} = enum
     TOX_ERR_CONFERENCE_BY_UID_OK, ##
                                  ##  One of the arguments to the function was NULL when it was not expected.
                                  ##
@@ -3061,7 +3065,7 @@ type                          ##
 
 
 proc tox_err_conference_by_uid_to_string*(value: Tox_Err_Conference_By_Uid): cstring {.
-    importc: "tox_err_conference_by_uid_to_string", header: "tox.h".}
+    importc: "tox_err_conference_by_uid_to_string", header: "tox/tox.h".}
 ##
 ##  @brief Return the conference number associated with the specified uid.
 ##
@@ -3076,7 +3080,7 @@ proc tox_err_conference_by_uid_to_string*(value: Tox_Err_Conference_By_Uid): cst
 proc tox_conference_by_uid*(tox: ptr Tox;
                            uid: array[TOX_CONFERENCE_UID_SIZE, uint8];
                            error: ptr Tox_Err_Conference_By_Uid): Tox_Conference_Number {.
-    importc: "tox_conference_by_uid", header: "tox.h".}
+    importc: "tox_conference_by_uid", header: "tox/tox.h".}
 ##  @}
 ##  @{
 ##  @name Low-level custom packet sending and receiving
@@ -3085,7 +3089,7 @@ proc tox_conference_by_uid*(tox: ptr Tox;
 type                          ##
     ##  The function returned successfully.
     ##
-  Tox_Err_Friend_Custom_Packet* {.size: sizeof(cint).} = enum
+  Tox_Err_Friend_Custom_Packet* {.size: sizeof(cint), importc: "Tox_Err_Friend_Custom_Packet", header: "tox/tox.h".} = enum
     TOX_ERR_FRIEND_CUSTOM_PACKET_OK, ##
                                     ##  One of the arguments to the function was NULL when it was not expected.
                                     ##
@@ -3113,7 +3117,7 @@ type                          ##
 
 
 proc tox_err_friend_custom_packet_to_string*(value: Tox_Err_Friend_Custom_Packet): cstring {.
-    importc: "tox_err_friend_custom_packet_to_string", header: "tox.h".}
+    importc: "tox_err_friend_custom_packet_to_string", header: "tox/tox.h".}
 ##
 ##  @brief Send a custom lossy packet to a friend.
 ##
@@ -3138,7 +3142,7 @@ proc tox_err_friend_custom_packet_to_string*(value: Tox_Err_Friend_Custom_Packet
 proc tox_friend_send_lossy_packet*(tox: ptr Tox; friend_number: Tox_Friend_Number;
                                   data: ptr uint8; length: csize_t;
                                   error: ptr Tox_Err_Friend_Custom_Packet): bool {.
-    importc: "tox_friend_send_lossy_packet", header: "tox.h".}
+    importc: "tox_friend_send_lossy_packet", header: "tox/tox.h".}
 ##
 ##  @brief Send a custom lossless packet to a friend.
 ##
@@ -3160,7 +3164,7 @@ proc tox_friend_send_lossless_packet*(tox: ptr Tox;
                                      friend_number: Tox_Friend_Number;
                                      data: ptr uint8; length: csize_t;
                                      error: ptr Tox_Err_Friend_Custom_Packet): bool {.
-    importc: "tox_friend_send_lossless_packet", header: "tox.h".}
+    importc: "tox_friend_send_lossless_packet", header: "tox/tox.h".}
 ##
 ##  @param friend_number The friend number of the friend who sent a lossy packet.
 ##  @param data A byte array containing the received packet data.
@@ -3180,7 +3184,7 @@ type
 
 proc tox_callback_friend_lossy_packet*(tox: ptr Tox;
                                       callback: ptr tox_friend_lossy_packet_cb) {.
-    importc: "tox_callback_friend_lossy_packet", header: "tox.h".}
+    importc: "tox_callback_friend_lossy_packet", header: "tox/tox.h".}
 ##
 ##  @param friend_number The friend number of the friend who sent the packet.
 ##  @param data A byte array containing the received packet data.
@@ -3200,8 +3204,8 @@ type
 ##
 
 proc tox_callback_friend_lossless_packet*(tox: ptr Tox;
-    callback: ptr tox_friend_lossless_packet_cb) {.
-    importc: "tox_callback_friend_lossless_packet", header: "tox.h".}
+    callback: tox_friend_lossless_packet_cb) {.
+    importc: "tox_callback_friend_lossless_packet", header: "tox/tox.h".}
 ##  @}
 ##  @{
 ##  @name Low-level network information
@@ -3210,7 +3214,7 @@ proc tox_callback_friend_lossless_packet*(tox: ptr Tox;
 type                          ##
     ##  The function returned successfully.
     ##
-  Tox_Err_Get_Port* {.size: sizeof(cint).} = enum
+  Tox_Err_Get_Port* {.size: sizeof(cint), importc: "Tox_Err_Get_Port", header: "tox/tox.h".} = enum
     TOX_ERR_GET_PORT_OK,      ##
                         ##  The instance was not bound to any port.
                         ##
@@ -3218,7 +3222,7 @@ type                          ##
 
 
 proc tox_err_get_port_to_string*(value: Tox_Err_Get_Port): cstring {.
-    importc: "tox_err_get_port_to_string", header: "tox.h".}
+    importc: "tox_err_get_port_to_string", header: "tox/tox.h".}
 ##
 ##  @brief Writes the temporary DHT public key of this instance to a byte array.
 ##
@@ -3234,13 +3238,13 @@ proc tox_err_get_port_to_string*(value: Tox_Err_Get_Port): cstring {.
 ##
 
 proc tox_self_get_dht_id*(tox: ptr Tox; dht_id: array[TOX_PUBLIC_KEY_SIZE, uint8]) {.
-    importc: "tox_self_get_dht_id", header: "tox.h".}
+    importc: "tox_self_get_dht_id", header: "tox/tox.h".}
 ##
 ##  @brief Return the UDP port this Tox instance is bound to.
 ##
 
 proc tox_self_get_udp_port*(tox: ptr Tox; error: ptr Tox_Err_Get_Port): uint16 {.
-    importc: "tox_self_get_udp_port", header: "tox.h".}
+    importc: "tox_self_get_udp_port", header: "tox/tox.h".}
 ##
 ##  @brief Return the TCP port this Tox instance is bound to.
 ##
@@ -3248,7 +3252,7 @@ proc tox_self_get_udp_port*(tox: ptr Tox; error: ptr Tox_Err_Get_Port): uint16 {
 ##
 
 proc tox_self_get_tcp_port*(tox: ptr Tox; error: ptr Tox_Err_Get_Port): uint16 {.
-    importc: "tox_self_get_tcp_port", header: "tox.h".}
+    importc: "tox_self_get_tcp_port", header: "tox/tox.h".}
 ##  @}
 ##  @{
 ##  @name Group chats
@@ -3272,7 +3276,7 @@ const
   TOX_GROUP_MAX_TOPIC_LENGTH* = 512
 
 proc tox_group_max_topic_length*(): uint32 {.importc: "tox_group_max_topic_length",
-    header: "tox.h".}
+    header: "tox/tox.h".}
 ##
 ##  Maximum length of a peer part message.
 ##
@@ -3281,7 +3285,7 @@ const
   TOX_GROUP_MAX_PART_LENGTH* = 128
 
 proc tox_group_max_part_length*(): uint32 {.importc: "tox_group_max_part_length",
-    header: "tox.h".}
+    header: "tox/tox.h".}
 ##
 ##  Maximum length of a group text message.
 ##
@@ -3290,7 +3294,7 @@ const
   TOX_GROUP_MAX_MESSAGE_LENGTH* = 1372
 
 proc tox_group_max_message_length*(): uint32 {.
-    importc: "tox_group_max_message_length", header: "tox.h".}
+    importc: "tox_group_max_message_length", header: "tox/tox.h".}
 ##
 ##  Maximum length of a group custom lossy packet.
 ##
@@ -3299,7 +3303,7 @@ const
   TOX_GROUP_MAX_CUSTOM_LOSSY_PACKET_LENGTH* = 1373
 
 proc tox_group_max_custom_lossy_packet_length*(): uint32 {.
-    importc: "tox_group_max_custom_lossy_packet_length", header: "tox.h".}
+    importc: "tox_group_max_custom_lossy_packet_length", header: "tox/tox.h".}
 ##
 ##  Maximum length of a group custom lossless packet.
 ##
@@ -3308,7 +3312,7 @@ const
   TOX_GROUP_MAX_CUSTOM_LOSSLESS_PACKET_LENGTH* = 1373
 
 proc tox_group_max_custom_lossless_packet_length*(): uint32 {.
-    importc: "tox_group_max_custom_lossless_packet_length", header: "tox.h".}
+    importc: "tox_group_max_custom_lossless_packet_length", header: "tox/tox.h".}
 ##
 ##  Maximum length of a group name.
 ##
@@ -3317,7 +3321,7 @@ const
   TOX_GROUP_MAX_GROUP_NAME_LENGTH* = 48
 
 proc tox_group_max_group_name_length*(): uint32 {.
-    importc: "tox_group_max_group_name_length", header: "tox.h".}
+    importc: "tox_group_max_group_name_length", header: "tox/tox.h".}
 ##
 ##  Maximum length of a group password.
 ##
@@ -3326,7 +3330,7 @@ const
   TOX_GROUP_MAX_PASSWORD_SIZE* = 32
 
 proc tox_group_max_password_size*(): uint32 {.
-    importc: "tox_group_max_password_size", header: "tox.h".}
+    importc: "tox_group_max_password_size", header: "tox/tox.h".}
 ##
 ##  Number of bytes in a group Chat ID.
 ##
@@ -3335,7 +3339,7 @@ const
   TOX_GROUP_CHAT_ID_SIZE* = 32
 
 proc tox_group_chat_id_size*(): uint32 {.importc: "tox_group_chat_id_size",
-                                      header: "tox.h".}
+                                      header: "tox/tox.h".}
 ##
 ##  Size of a peer public key.
 ##
@@ -3344,7 +3348,7 @@ const
   TOX_GROUP_PEER_PUBLIC_KEY_SIZE* = 32
 
 proc tox_group_peer_public_key_size*(): uint32 {.
-    importc: "tox_group_peer_public_key_size", header: "tox.h".}
+    importc: "tox_group_peer_public_key_size", header: "tox/tox.h".}
 ## *****************************************************************************
 ##
 ##  :: Group chat state enumerators
@@ -3363,7 +3367,7 @@ type ##
     ##  ID, IP addresses, and peer ID's (but not Tox ID's) is visible to anyone
     ##  with access to a node storing a DHT entry for the given group.
     ##
-  Tox_Group_Privacy_State* {.size: sizeof(cint).} = enum
+  Tox_Group_Privacy_State* {.size: sizeof(cint), importc: "Tox_Group_Privacy_State", header: "tox/tox.h".} = enum
     TOX_GROUP_PRIVACY_STATE_PUBLIC, ##
                                    ##  The group is considered to be private. The only way to join the group is
                                    ##  by having someone in your contact list send you an invite.
@@ -3377,7 +3381,7 @@ type ##
 
 
 proc tox_group_privacy_state_to_string*(value: Tox_Group_Privacy_State): cstring {.
-    importc: "tox_group_privacy_state_to_string", header: "tox.h".}
+    importc: "tox_group_privacy_state_to_string", header: "tox/tox.h".}
 ##
 ##  Represents the state of the group topic lock.
 ##
@@ -3388,7 +3392,7 @@ type ##
     ##  The topic lock is enabled. Only peers with the founder and moderator
     ##  roles may set the topic.
     ##
-  Tox_Group_Topic_Lock* {.size: sizeof(cint).} = enum
+  Tox_Group_Topic_Lock* {.size: sizeof(cint), importc: "Tox_Group_Topic_Lock", header: "tox/tox.h".} = enum
     TOX_GROUP_TOPIC_LOCK_ENABLED, ##
                                  ##  The topic lock is disabled. All peers except those with the observer role
                                  ##  may set the topic.
@@ -3397,7 +3401,7 @@ type ##
 
 
 proc tox_group_topic_lock_to_string*(value: Tox_Group_Topic_Lock): cstring {.
-    importc: "tox_group_topic_lock_to_string", header: "tox.h".}
+    importc: "tox_group_topic_lock_to_string", header: "tox/tox.h".}
 ##
 ##  Represents the group voice state, which determines which Group Roles have
 ##  permission to speak in the group chat. The voice state does not have any
@@ -3407,7 +3411,7 @@ proc tox_group_topic_lock_to_string*(value: Tox_Group_Topic_Lock): cstring {.
 type ##
     ##  All group roles above Observer have permission to speak.
     ##
-  Tox_Group_Voice_State* {.size: sizeof(cint).} = enum
+  Tox_Group_Voice_State* {.size: sizeof(cint), importc: "Tox_Group_Voice_State", header: "tox/tox.h".} = enum
     TOX_GROUP_VOICE_STATE_ALL, ##
                               ##  Moderators and Founders have permission to speak.
                               ##
@@ -3418,7 +3422,7 @@ type ##
 
 
 proc tox_group_voice_state_to_string*(value: Tox_Group_Voice_State): cstring {.
-    importc: "tox_group_voice_state_to_string", header: "tox.h".}
+    importc: "tox_group_voice_state_to_string", header: "tox/tox.h".}
 ##
 ##  Represents group roles.
 ##
@@ -3431,7 +3435,7 @@ type ##
     ##  founder). Founders may also set the group password, toggle the privacy
     ##  state, and set the peer limit.
     ##
-  Tox_Group_Role* {.size: sizeof(cint).} = enum
+  Tox_Group_Role* {.size: sizeof(cint), importc: "Tox_Group_Role", header: "tox/tox.h".} = enum
     TOX_GROUP_ROLE_FOUNDER, ##
                            ##  May kick and set the user and observer roles for peers below this role.
                            ##  May also set the group topic.
@@ -3447,7 +3451,7 @@ type ##
 
 
 proc tox_group_role_to_string*(value: Tox_Group_Role): cstring {.
-    importc: "tox_group_role_to_string", header: "tox.h".}
+    importc: "tox_group_role_to_string", header: "tox/tox.h".}
 ## *****************************************************************************
 ##
 ##  :: Group chat instance management
@@ -3457,7 +3461,7 @@ proc tox_group_role_to_string*(value: Tox_Group_Role): cstring {.
 type                          ##
     ##  The function returned successfully.
     ##
-  Tox_Err_Group_New* {.size: sizeof(cint).} = enum
+  Tox_Err_Group_New* {.size: sizeof(cint), importc: "Tox_Err_Group_New", header: "tox/tox.h".} = enum
     TOX_ERR_GROUP_NEW_OK, ##
                          ##  name exceeds TOX_MAX_NAME_LENGTH or group_name exceeded
                          ##  TOX_GROUP_MAX_GROUP_NAME_LENGTH.
@@ -3480,7 +3484,7 @@ type                          ##
 
 
 proc tox_err_group_new_to_string*(value: Tox_Err_Group_New): cstring {.
-    importc: "tox_err_group_new_to_string", header: "tox.h".}
+    importc: "tox_err_group_new_to_string", header: "tox/tox.h".}
 ##
 ##  Creates a new group chat.
 ##
@@ -3509,11 +3513,11 @@ proc tox_group_new*(tox: ptr Tox; privacy_state: Tox_Group_Privacy_State;
                    group_name: ptr uint8; group_name_length: csize_t;
                    name: ptr uint8; name_length: csize_t;
                    error: ptr Tox_Err_Group_New): Tox_Group_Number {.
-    importc: "tox_group_new", header: "tox.h".}
+    importc: "tox_group_new", header: "tox/tox.h".}
 type                          ##
     ##  The function returned successfully.
     ##
-  Tox_Err_Group_Join* {.size: sizeof(cint).} = enum
+  Tox_Err_Group_Join* {.size: sizeof(cint), importc: "Tox_Err_Group_Join", header: "tox/tox.h".} = enum
     TOX_ERR_GROUP_JOIN_OK,    ##
                           ##  The group instance failed to initialize.
                           ##
@@ -3539,7 +3543,7 @@ type                          ##
 
 
 proc tox_err_group_join_to_string*(value: Tox_Err_Group_Join): cstring {.
-    importc: "tox_err_group_join_to_string", header: "tox.h".}
+    importc: "tox_err_group_join_to_string", header: "tox/tox.h".}
 ##
 ##  Joins a group chat with specified Chat ID.
 ##
@@ -3564,11 +3568,11 @@ proc tox_err_group_join_to_string*(value: Tox_Err_Group_Join): cstring {.
 proc tox_group_join*(tox: ptr Tox; chat_id: array[TOX_GROUP_CHAT_ID_SIZE, uint8];
                     name: ptr uint8; name_length: csize_t; password: ptr uint8;
                     password_length: csize_t; error: ptr Tox_Err_Group_Join): Tox_Group_Number {.
-    importc: "tox_group_join", header: "tox.h".}
+    importc: "tox_group_join", header: "tox/tox.h".}
 type                          ##
     ##  The function returned successfully.
     ##
-  Tox_Err_Group_Is_Connected* {.size: sizeof(cint).} = enum
+  Tox_Err_Group_Is_Connected* {.size: sizeof(cint), importc: "Tox_Err_Group_Is_Connected", header: "tox/tox.h".} = enum
     TOX_ERR_GROUP_IS_CONNECTED_OK, ##
                                   ##  The group number passed did not designate a valid group.
                                   ##
@@ -3576,7 +3580,7 @@ type                          ##
 
 
 proc tox_err_group_is_connected_to_string*(value: Tox_Err_Group_Is_Connected): cstring {.
-    importc: "tox_err_group_is_connected_to_string", header: "tox.h".}
+    importc: "tox_err_group_is_connected_to_string", header: "tox/tox.h".}
 ##
 ##  Returns true if the group chat is currently connected or attempting to
 ##  connect to other peers in the group.
@@ -3586,11 +3590,11 @@ proc tox_err_group_is_connected_to_string*(value: Tox_Err_Group_Is_Connected): c
 
 proc tox_group_is_connected*(tox: ptr Tox; group_number: Tox_Group_Number;
                             error: ptr Tox_Err_Group_Is_Connected): bool {.
-    importc: "tox_group_is_connected", header: "tox.h".}
+    importc: "tox_group_is_connected", header: "tox/tox.h".}
 type                          ##
     ##  The function returned successfully.
     ##
-  Tox_Err_Group_Disconnect* {.size: sizeof(cint).} = enum
+  Tox_Err_Group_Disconnect* {.size: sizeof(cint), importc: "Tox_Err_Group_Disconnect", header: "tox/tox.h".} = enum
     TOX_ERR_GROUP_DISCONNECT_OK, ##
                                 ##  The group number passed did not designate a valid group.
                                 ##
@@ -3601,7 +3605,7 @@ type                          ##
 
 
 proc tox_err_group_disconnect_to_string*(value: Tox_Err_Group_Disconnect): cstring {.
-    importc: "tox_err_group_disconnect_to_string", header: "tox.h".}
+    importc: "tox_err_group_disconnect_to_string", header: "tox/tox.h".}
 ##
 ##  Disconnects from a group chat while retaining the group state and
 ##  credentials.
@@ -3613,11 +3617,11 @@ proc tox_err_group_disconnect_to_string*(value: Tox_Err_Group_Disconnect): cstri
 
 proc tox_group_disconnect*(tox: ptr Tox; group_number: Tox_Group_Number;
                           error: ptr Tox_Err_Group_Disconnect): bool {.
-    importc: "tox_group_disconnect", header: "tox.h".}
+    importc: "tox_group_disconnect", header: "tox/tox.h".}
 type                          ##
     ##  The function returned successfully.
     ##
-  Tox_Err_Group_Reconnect* {.size: sizeof(cint).} = enum
+  Tox_Err_Group_Reconnect* {.size: sizeof(cint), importc: "Tox_Err_Group_Reconnect", header: "tox/tox.h".} = enum
     TOX_ERR_GROUP_RECONNECT_OK, ##
                                ##  The group number passed did not designate a valid group.
                                ##
@@ -3628,7 +3632,7 @@ type                          ##
 
 
 proc tox_err_group_reconnect_to_string*(value: Tox_Err_Group_Reconnect): cstring {.
-    importc: "tox_err_group_reconnect_to_string", header: "tox.h".}
+    importc: "tox_err_group_reconnect_to_string", header: "tox/tox.h".}
 ##
 ##  Reconnects to a group.
 ##
@@ -3643,11 +3647,11 @@ proc tox_err_group_reconnect_to_string*(value: Tox_Err_Group_Reconnect): cstring
 
 proc tox_group_reconnect*(tox: ptr Tox; group_number: Tox_Group_Number;
                          error: ptr Tox_Err_Group_Reconnect): bool {.
-    importc: "tox_group_reconnect", header: "tox.h".}
+    importc: "tox_group_reconnect", header: "tox/tox.h".}
 type                          ##
     ##  The function returned successfully.
     ##
-  Tox_Err_Group_Leave* {.size: sizeof(cint).} = enum
+  Tox_Err_Group_Leave* {.size: sizeof(cint), importc: "Tox_Err_Group_Leave", header: "tox/tox.h".} = enum
     TOX_ERR_GROUP_LEAVE_OK, ##
                            ##  The group number passed did not designate a valid group.
                            ##
@@ -3661,7 +3665,7 @@ type                          ##
 
 
 proc tox_err_group_leave_to_string*(value: Tox_Err_Group_Leave): cstring {.
-    importc: "tox_err_group_leave_to_string", header: "tox.h".}
+    importc: "tox_err_group_leave_to_string", header: "tox/tox.h".}
 ##
 ##  Leaves a group.
 ##
@@ -3682,7 +3686,7 @@ proc tox_err_group_leave_to_string*(value: Tox_Err_Group_Leave): cstring {.
 proc tox_group_leave*(tox: ptr Tox; group_number: Tox_Group_Number;
                      part_message: ptr uint8; length: csize_t;
                      error: ptr Tox_Err_Group_Leave): bool {.
-    importc: "tox_group_leave", header: "tox.h".}
+    importc: "tox_group_leave", header: "tox/tox.h".}
 ## *****************************************************************************
 ##
 ##  :: Group user-visible client information (nickname/status/role/public key)
@@ -3695,7 +3699,7 @@ proc tox_group_leave*(tox: ptr Tox; group_number: Tox_Group_Number;
 type                          ##
     ##  The function returned successfully.
     ##
-  Tox_Err_Group_Self_Query* {.size: sizeof(cint).} = enum
+  Tox_Err_Group_Self_Query* {.size: sizeof(cint), importc: "Tox_Err_Group_Self_Query", header: "tox/tox.h".} = enum
     TOX_ERR_GROUP_SELF_QUERY_OK, ##
                                 ##  The group number passed did not designate a valid group.
                                 ##
@@ -3703,7 +3707,7 @@ type                          ##
 
 
 proc tox_err_group_self_query_to_string*(value: Tox_Err_Group_Self_Query): cstring {.
-    importc: "tox_err_group_self_query_to_string", header: "tox.h".}
+    importc: "tox_err_group_self_query_to_string", header: "tox/tox.h".}
 ##
 ##  Error codes for self name setting.
 ##
@@ -3711,7 +3715,7 @@ proc tox_err_group_self_query_to_string*(value: Tox_Err_Group_Self_Query): cstri
 type                          ##
     ##  The function returned successfully.
     ##
-  Tox_Err_Group_Self_Name_Set* {.size: sizeof(cint).} = enum
+  Tox_Err_Group_Self_Name_Set* {.size: sizeof(cint), importc: "Tox_Err_Group_Self_Name_Set", header: "tox/tox.h".} = enum
     TOX_ERR_GROUP_SELF_NAME_SET_OK, ##
                                    ##  The group number passed did not designate a valid group.
                                    ##
@@ -3728,7 +3732,7 @@ type                          ##
 
 
 proc tox_err_group_self_name_set_to_string*(value: Tox_Err_Group_Self_Name_Set): cstring {.
-    importc: "tox_err_group_self_name_set_to_string", header: "tox.h".}
+    importc: "tox_err_group_self_name_set_to_string", header: "tox/tox.h".}
 ##
 ##  Set the client's nickname for the group instance designated by the given
 ##  group number.
@@ -3745,7 +3749,7 @@ proc tox_err_group_self_name_set_to_string*(value: Tox_Err_Group_Self_Name_Set):
 proc tox_group_self_set_name*(tox: ptr Tox; group_number: Tox_Group_Number;
                              name: ptr uint8; length: csize_t;
                              error: ptr Tox_Err_Group_Self_Name_Set): bool {.
-    importc: "tox_group_self_set_name", header: "tox.h".}
+    importc: "tox_group_self_set_name", header: "tox/tox.h".}
 ##
 ##  Return the length of the client's current nickname for the group instance
 ##  designated by group_number as passed to tox_group_self_set_name.
@@ -3758,7 +3762,7 @@ proc tox_group_self_set_name*(tox: ptr Tox; group_number: Tox_Group_Number;
 
 proc tox_group_self_get_name_size*(tox: ptr Tox; group_number: Tox_Group_Number;
                                   error: ptr Tox_Err_Group_Self_Query): csize_t {.
-    importc: "tox_group_self_get_name_size", header: "tox.h".}
+    importc: "tox_group_self_get_name_size", header: "tox/tox.h".}
 ##
 ##  Write the nickname set by tox_group_self_set_name to a byte array.
 ##
@@ -3776,7 +3780,7 @@ proc tox_group_self_get_name_size*(tox: ptr Tox; group_number: Tox_Group_Number;
 
 proc tox_group_self_get_name*(tox: ptr Tox; group_number: Tox_Group_Number;
                              name: ptr uint8; error: ptr Tox_Err_Group_Self_Query): bool {.
-    importc: "tox_group_self_get_name", header: "tox.h".}
+    importc: "tox_group_self_get_name", header: "tox/tox.h".}
 ##
 ##  Error codes for self status setting.
 ##
@@ -3784,7 +3788,7 @@ proc tox_group_self_get_name*(tox: ptr Tox; group_number: Tox_Group_Number;
 type                          ##
     ##  The function returned successfully.
     ##
-  Tox_Err_Group_Self_Status_Set* {.size: sizeof(cint).} = enum
+  Tox_Err_Group_Self_Status_Set* {.size: sizeof(cint), importc: "Tox_Err_Group_Self_Status_Set", header: "tox/tox.h".} = enum
     TOX_ERR_GROUP_SELF_STATUS_SET_OK, ##
                                      ##  The group number passed did not designate a valid group.
                                      ##
@@ -3796,7 +3800,7 @@ type                          ##
 
 proc tox_err_group_self_status_set_to_string*(
     value: Tox_Err_Group_Self_Status_Set): cstring {.
-    importc: "tox_err_group_self_status_set_to_string", header: "tox.h".}
+    importc: "tox_err_group_self_status_set_to_string", header: "tox/tox.h".}
 ##
 ##  Set the client's status for the group instance. Status must be a
 ##  Tox_User_Status.
@@ -3807,7 +3811,7 @@ proc tox_err_group_self_status_set_to_string*(
 proc tox_group_self_set_status*(tox: ptr Tox; group_number: Tox_Group_Number;
                                status: Tox_User_Status;
                                error: ptr Tox_Err_Group_Self_Status_Set): bool {.
-    importc: "tox_group_self_set_status", header: "tox.h".}
+    importc: "tox_group_self_set_status", header: "tox/tox.h".}
 ##
 ##  returns the client's status for the group instance on success.
 ##  return value is unspecified on failure.
@@ -3815,7 +3819,7 @@ proc tox_group_self_set_status*(tox: ptr Tox; group_number: Tox_Group_Number;
 
 proc tox_group_self_get_status*(tox: ptr Tox; group_number: Tox_Group_Number;
                                error: ptr Tox_Err_Group_Self_Query): Tox_User_Status {.
-    importc: "tox_group_self_get_status", header: "tox.h".}
+    importc: "tox_group_self_get_status", header: "tox/tox.h".}
 ##
 ##  returns the client's role for the group instance on success.
 ##  return value is unspecified on failure.
@@ -3823,7 +3827,7 @@ proc tox_group_self_get_status*(tox: ptr Tox; group_number: Tox_Group_Number;
 
 proc tox_group_self_get_role*(tox: ptr Tox; group_number: Tox_Group_Number;
                              error: ptr Tox_Err_Group_Self_Query): Tox_Group_Role {.
-    importc: "tox_group_self_get_role", header: "tox.h".}
+    importc: "tox_group_self_get_role", header: "tox/tox.h".}
 ##
 ##  returns the client's peer id for the group instance on success.
 ##  return value is unspecified on failure.
@@ -3831,7 +3835,7 @@ proc tox_group_self_get_role*(tox: ptr Tox; group_number: Tox_Group_Number;
 
 proc tox_group_self_get_peer_id*(tox: ptr Tox; group_number: Tox_Group_Number;
                                 error: ptr Tox_Err_Group_Self_Query): Tox_Group_Peer_Number {.
-    importc: "tox_group_self_get_peer_id", header: "tox.h".}
+    importc: "tox_group_self_get_peer_id", header: "tox/tox.h".}
 ##
 ##  Write the client's group public key designated by the given group number to
 ##  a byte array.
@@ -3853,7 +3857,7 @@ proc tox_group_self_get_peer_id*(tox: ptr Tox; group_number: Tox_Group_Number;
 proc tox_group_self_get_public_key*(tox: ptr Tox; group_number: Tox_Group_Number;
     public_key: array[TOX_PUBLIC_KEY_SIZE, uint8];
                                    error: ptr Tox_Err_Group_Self_Query): bool {.
-    importc: "tox_group_self_get_public_key", header: "tox.h".}
+    importc: "tox_group_self_get_public_key", header: "tox/tox.h".}
 ## *****************************************************************************
 ##
 ##  :: Peer-specific group state queries.
@@ -3866,7 +3870,7 @@ proc tox_group_self_get_public_key*(tox: ptr Tox; group_number: Tox_Group_Number
 type                          ##
     ##  The function returned successfully.
     ##
-  Tox_Err_Group_Peer_Query* {.size: sizeof(cint).} = enum
+  Tox_Err_Group_Peer_Query* {.size: sizeof(cint), importc: "Tox_Err_Group_Peer_Query", header: "tox/tox.h".} = enum
     TOX_ERR_GROUP_PEER_QUERY_OK, ##
                                 ##  The group number passed did not designate a valid group.
                                 ##
@@ -3877,7 +3881,7 @@ type                          ##
 
 
 proc tox_err_group_peer_query_to_string*(value: Tox_Err_Group_Peer_Query): cstring {.
-    importc: "tox_err_group_peer_query_to_string", header: "tox.h".}
+    importc: "tox_err_group_peer_query_to_string", header: "tox/tox.h".}
 ##
 ##  Return the length of the peer's name. If the group number or ID is invalid,
 ##  the return value is unspecified.
@@ -3892,7 +3896,7 @@ proc tox_err_group_peer_query_to_string*(value: Tox_Err_Group_Peer_Query): cstri
 proc tox_group_peer_get_name_size*(tox: ptr Tox; group_number: Tox_Group_Number;
                                   peer_id: Tox_Group_Peer_Number;
                                   error: ptr Tox_Err_Group_Peer_Query): csize_t {.
-    importc: "tox_group_peer_get_name_size", header: "tox.h".}
+    importc: "tox_group_peer_get_name_size", header: "tox/tox.h".}
 ##
 ##  Write the name of the peer designated by the given ID to a byte
 ##  array.
@@ -3913,7 +3917,7 @@ proc tox_group_peer_get_name_size*(tox: ptr Tox; group_number: Tox_Group_Number;
 proc tox_group_peer_get_name*(tox: ptr Tox; group_number: Tox_Group_Number;
                              peer_id: Tox_Group_Peer_Number; name: ptr uint8;
                              error: ptr Tox_Err_Group_Peer_Query): bool {.
-    importc: "tox_group_peer_get_name", header: "tox.h".}
+    importc: "tox_group_peer_get_name", header: "tox/tox.h".}
 ##
 ##  Return the peer's user status (away/busy/...). If the ID or group number is
 ##  invalid, the return value is unspecified.
@@ -3928,7 +3932,7 @@ proc tox_group_peer_get_name*(tox: ptr Tox; group_number: Tox_Group_Number;
 proc tox_group_peer_get_status*(tox: ptr Tox; group_number: Tox_Group_Number;
                                peer_id: Tox_Group_Peer_Number;
                                error: ptr Tox_Err_Group_Peer_Query): Tox_User_Status {.
-    importc: "tox_group_peer_get_status", header: "tox.h".}
+    importc: "tox_group_peer_get_status", header: "tox/tox.h".}
 ##
 ##  Return the peer's role (user/moderator/founder...). If the ID or group number
 ##  is invalid, the return value is unspecified.
@@ -3943,7 +3947,7 @@ proc tox_group_peer_get_status*(tox: ptr Tox; group_number: Tox_Group_Number;
 proc tox_group_peer_get_role*(tox: ptr Tox; group_number: Tox_Group_Number;
                              peer_id: Tox_Group_Peer_Number;
                              error: ptr Tox_Err_Group_Peer_Query): Tox_Group_Role {.
-    importc: "tox_group_peer_get_role", header: "tox.h".}
+    importc: "tox_group_peer_get_role", header: "tox/tox.h".}
 ##
 ##  Return the type of connection we have established with a peer.
 ##
@@ -3958,7 +3962,7 @@ proc tox_group_peer_get_role*(tox: ptr Tox; group_number: Tox_Group_Number;
 proc tox_group_peer_get_connection_status*(tox: ptr Tox;
     group_number: Tox_Group_Number; peer_id: Tox_Group_Peer_Number;
     error: ptr Tox_Err_Group_Peer_Query): Tox_Connection {.
-    importc: "tox_group_peer_get_connection_status", header: "tox.h".}
+    importc: "tox_group_peer_get_connection_status", header: "tox/tox.h".}
 ##
 ##  Write the group public key with the designated peer_id for the designated
 ##  group number to public_key.
@@ -3981,7 +3985,7 @@ proc tox_group_peer_get_connection_status*(tox: ptr Tox;
 proc tox_group_peer_get_public_key*(tox: ptr Tox; group_number: Tox_Group_Number;
                                    peer_id: Tox_Group_Peer_Number; public_key: array[
     TOX_PUBLIC_KEY_SIZE, uint8]; error: ptr Tox_Err_Group_Peer_Query): bool {.
-    importc: "tox_group_peer_get_public_key", header: "tox.h".}
+    importc: "tox_group_peer_get_public_key", header: "tox/tox.h".}
 ##
 ##  @param group_number The group number of the group the name change is intended
 ##    for.
@@ -4003,7 +4007,7 @@ type
 
 proc tox_callback_group_peer_name*(tox: ptr Tox;
                                   callback: ptr tox_group_peer_name_cb) {.
-    importc: "tox_callback_group_peer_name", header: "tox.h".}
+    importc: "tox_callback_group_peer_name", header: "tox/tox.h".}
 ##
 ##  @param group_number The group number of the group the status change is
 ##    intended for.
@@ -4024,7 +4028,7 @@ type
 
 proc tox_callback_group_peer_status*(tox: ptr Tox;
                                     callback: ptr tox_group_peer_status_cb) {.
-    importc: "tox_callback_group_peer_status", header: "tox.h".}
+    importc: "tox_callback_group_peer_status", header: "tox/tox.h".}
 ## *****************************************************************************
 ##
 ##  :: Group chat state queries and events.
@@ -4037,7 +4041,7 @@ proc tox_callback_group_peer_status*(tox: ptr Tox;
 type                          ##
     ##  The function returned successfully.
     ##
-  Tox_Err_Group_State_Query* {.size: sizeof(cint).} = enum
+  Tox_Err_Group_State_Query* {.size: sizeof(cint), importc: "Tox_Err_Group_State_Query", header: "tox/tox.h".} = enum
     TOX_ERR_GROUP_STATE_QUERY_OK, ##
                                  ##  The group number passed did not designate a valid group.
                                  ##
@@ -4045,7 +4049,7 @@ type                          ##
 
 
 proc tox_err_group_state_query_to_string*(value: Tox_Err_Group_State_Query): cstring {.
-    importc: "tox_err_group_state_query_to_string", header: "tox.h".}
+    importc: "tox_err_group_state_query_to_string", header: "tox/tox.h".}
 ##
 ##  Error codes for group topic setting.
 ##
@@ -4053,7 +4057,7 @@ proc tox_err_group_state_query_to_string*(value: Tox_Err_Group_State_Query): cst
 type                          ##
     ##  The function returned successfully.
     ##
-  Tox_Err_Group_Topic_Set* {.size: sizeof(cint).} = enum
+  Tox_Err_Group_Topic_Set* {.size: sizeof(cint), importc: "Tox_Err_Group_Topic_Set", header: "tox/tox.h".} = enum
     TOX_ERR_GROUP_TOPIC_SET_OK, ##
                                ##  The group number passed did not designate a valid group.
                                ##
@@ -4077,7 +4081,7 @@ type                          ##
 
 
 proc tox_err_group_topic_set_to_string*(value: Tox_Err_Group_Topic_Set): cstring {.
-    importc: "tox_err_group_topic_set_to_string", header: "tox.h".}
+    importc: "tox_err_group_topic_set_to_string", header: "tox/tox.h".}
 ##
 ##  Set the group topic and broadcast it to the rest of the group.
 ##
@@ -4090,7 +4094,7 @@ proc tox_err_group_topic_set_to_string*(value: Tox_Err_Group_Topic_Set): cstring
 proc tox_group_set_topic*(tox: ptr Tox; group_number: Tox_Group_Number;
                          topic: ptr uint8; length: csize_t;
                          error: ptr Tox_Err_Group_Topic_Set): bool {.
-    importc: "tox_group_set_topic", header: "tox.h".}
+    importc: "tox_group_set_topic", header: "tox/tox.h".}
 ##
 ##  Return the length of the group topic. If the group number is invalid, the
 ##  return value is unspecified.
@@ -4101,7 +4105,7 @@ proc tox_group_set_topic*(tox: ptr Tox; group_number: Tox_Group_Number;
 
 proc tox_group_get_topic_size*(tox: ptr Tox; group_number: Tox_Group_Number;
                               error: ptr Tox_Err_Group_State_Query): csize_t {.
-    importc: "tox_group_get_topic_size", header: "tox.h".}
+    importc: "tox_group_get_topic_size", header: "tox/tox.h".}
 ##
 ##  Write the topic designated by the given group number to a byte array.
 ##
@@ -4119,7 +4123,7 @@ proc tox_group_get_topic_size*(tox: ptr Tox; group_number: Tox_Group_Number;
 
 proc tox_group_get_topic*(tox: ptr Tox; group_number: Tox_Group_Number;
                          topic: ptr uint8; error: ptr Tox_Err_Group_State_Query): bool {.
-    importc: "tox_group_get_topic", header: "tox.h".}
+    importc: "tox_group_get_topic", header: "tox/tox.h".}
 ##
 ##  @param group_number The group number of the group the topic change is
 ##    intended for.
@@ -4141,7 +4145,7 @@ type
 ##
 
 proc tox_callback_group_topic*(tox: ptr Tox; callback: ptr tox_group_topic_cb) {.
-    importc: "tox_callback_group_topic", header: "tox.h".}
+    importc: "tox_callback_group_topic", header: "tox/tox.h".}
 ##
 ##  Return the length of the group name. If the group number is invalid, the
 ##  return value is unspecified.
@@ -4149,7 +4153,7 @@ proc tox_callback_group_topic*(tox: ptr Tox; callback: ptr tox_group_topic_cb) {
 
 proc tox_group_get_name_size*(tox: ptr Tox; group_number: Tox_Group_Number;
                              error: ptr Tox_Err_Group_State_Query): csize_t {.
-    importc: "tox_group_get_name_size", header: "tox.h".}
+    importc: "tox_group_get_name_size", header: "tox/tox.h".}
 ##
 ##  Write the name of the group designated by the given group number to a byte
 ##  array.
@@ -4165,7 +4169,7 @@ proc tox_group_get_name_size*(tox: ptr Tox; group_number: Tox_Group_Number;
 
 proc tox_group_get_name*(tox: ptr Tox; group_number: Tox_Group_Number;
                         name: ptr uint8; error: ptr Tox_Err_Group_State_Query): bool {.
-    importc: "tox_group_get_name", header: "tox.h".}
+    importc: "tox_group_get_name", header: "tox/tox.h".}
 ##
 ##  Write the Chat ID designated by the given group number to a byte array.
 ##
@@ -4180,13 +4184,13 @@ proc tox_group_get_name*(tox: ptr Tox; group_number: Tox_Group_Number;
 proc tox_group_get_chat_id*(tox: ptr Tox; group_number: Tox_Group_Number;
                            chat_id: array[TOX_GROUP_CHAT_ID_SIZE, uint8];
                            error: ptr Tox_Err_Group_State_Query): bool {.
-    importc: "tox_group_get_chat_id", header: "tox.h".}
+    importc: "tox_group_get_chat_id", header: "tox/tox.h".}
 ##
 ##  Return the number of groups in the Tox chats array.
 ##
 
 proc tox_group_get_number_groups*(tox: ptr Tox): uint32 {.
-    importc: "tox_group_get_number_groups", header: "tox.h".}
+    importc: "tox_group_get_number_groups", header: "tox/tox.h".}
 ##
 ##  Return the privacy state of the group designated by the given group number.
 ##  If group number is invalid, the return value is unspecified.
@@ -4200,7 +4204,7 @@ proc tox_group_get_number_groups*(tox: ptr Tox): uint32 {.
 
 proc tox_group_get_privacy_state*(tox: ptr Tox; group_number: Tox_Group_Number;
                                  error: ptr Tox_Err_Group_State_Query): Tox_Group_Privacy_State {.
-    importc: "tox_group_get_privacy_state", header: "tox.h".}
+    importc: "tox_group_get_privacy_state", header: "tox/tox.h".}
 ##
 ##  @param group_number The group number of the group the privacy state is
 ##    intended for.
@@ -4220,7 +4224,7 @@ type
 
 proc tox_callback_group_privacy_state*(tox: ptr Tox;
                                       callback: ptr tox_group_privacy_state_cb) {.
-    importc: "tox_callback_group_privacy_state", header: "tox.h".}
+    importc: "tox_callback_group_privacy_state", header: "tox/tox.h".}
 ##
 ##  Return the voice state of the group designated by the given group number. If
 ##  group number is invalid, the return value is unspecified.
@@ -4234,7 +4238,7 @@ proc tox_callback_group_privacy_state*(tox: ptr Tox;
 
 proc tox_group_get_voice_state*(tox: ptr Tox; group_number: Tox_Group_Number;
                                error: ptr Tox_Err_Group_State_Query): Tox_Group_Voice_State {.
-    importc: "tox_group_get_voice_state", header: "tox.h".}
+    importc: "tox_group_get_voice_state", header: "tox/tox.h".}
 ##
 ##  @param group_number The group number of the group the voice state change is
 ##    intended for.
@@ -4254,7 +4258,7 @@ type
 
 proc tox_callback_group_voice_state*(tox: ptr Tox;
                                     callback: ptr tox_group_voice_state_cb) {.
-    importc: "tox_callback_group_voice_state", header: "tox.h".}
+    importc: "tox_callback_group_voice_state", header: "tox/tox.h".}
 ##
 ##  Return the topic lock status of the group designated by the given group
 ##  number. If group number
@@ -4269,7 +4273,7 @@ proc tox_callback_group_voice_state*(tox: ptr Tox;
 
 proc tox_group_get_topic_lock*(tox: ptr Tox; group_number: Tox_Group_Number;
                               error: ptr Tox_Err_Group_State_Query): Tox_Group_Topic_Lock {.
-    importc: "tox_group_get_topic_lock", header: "tox.h".}
+    importc: "tox_group_get_topic_lock", header: "tox/tox.h".}
 ##
 ##  @param group_number The group number of the group for which the topic lock
 ##    has changed.
@@ -4289,7 +4293,7 @@ type
 
 proc tox_callback_group_topic_lock*(tox: ptr Tox;
                                    callback: ptr tox_group_topic_lock_cb) {.
-    importc: "tox_callback_group_topic_lock", header: "tox.h".}
+    importc: "tox_callback_group_topic_lock", header: "tox/tox.h".}
 ##
 ##  Return the maximum number of peers allowed for the group designated by the
 ##  given group number. If the group number is invalid, the return value is
@@ -4304,7 +4308,7 @@ proc tox_callback_group_topic_lock*(tox: ptr Tox;
 
 proc tox_group_get_peer_limit*(tox: ptr Tox; group_number: Tox_Group_Number;
                               error: ptr Tox_Err_Group_State_Query): uint16 {.
-    importc: "tox_group_get_peer_limit", header: "tox.h".}
+    importc: "tox_group_get_peer_limit", header: "tox/tox.h".}
 ##
 ##  @param group_number The group number of the group for which the peer limit
 ##    has changed.
@@ -4324,7 +4328,7 @@ type
 
 proc tox_callback_group_peer_limit*(tox: ptr Tox;
                                    callback: ptr tox_group_peer_limit_cb) {.
-    importc: "tox_callback_group_peer_limit", header: "tox.h".}
+    importc: "tox_callback_group_peer_limit", header: "tox/tox.h".}
 ##
 ##  Return the length of the group password. If the group number is invalid, the
 ##  return value is unspecified.
@@ -4332,7 +4336,7 @@ proc tox_callback_group_peer_limit*(tox: ptr Tox;
 
 proc tox_group_get_password_size*(tox: ptr Tox; group_number: Tox_Group_Number;
                                  error: ptr Tox_Err_Group_State_Query): csize_t {.
-    importc: "tox_group_get_password_size", header: "tox.h".}
+    importc: "tox_group_get_password_size", header: "tox/tox.h".}
 ##
 ##  Write the password for the group designated by the given group number to a
 ##  byte array.
@@ -4355,7 +4359,7 @@ proc tox_group_get_password_size*(tox: ptr Tox; group_number: Tox_Group_Number;
 proc tox_group_get_password*(tox: ptr Tox; group_number: Tox_Group_Number;
                             password: ptr uint8;
                             error: ptr Tox_Err_Group_State_Query): bool {.
-    importc: "tox_group_get_password", header: "tox.h".}
+    importc: "tox_group_get_password", header: "tox/tox.h".}
 ##
 ##  @param group_number The group number of the group for which the password has
 ##    changed.
@@ -4375,7 +4379,7 @@ type
 ##
 
 proc tox_callback_group_password*(tox: ptr Tox; callback: ptr tox_group_password_cb) {.
-    importc: "tox_callback_group_password", header: "tox.h".}
+    importc: "tox_callback_group_password", header: "tox/tox.h".}
 ## *****************************************************************************
 ##
 ##  :: Group chat message sending
@@ -4385,7 +4389,7 @@ proc tox_callback_group_password*(tox: ptr Tox; callback: ptr tox_group_password
 type                          ##
     ##  The function returned successfully.
     ##
-  Tox_Err_Group_Send_Message* {.size: sizeof(cint).} = enum
+  Tox_Err_Group_Send_Message* {.size: sizeof(cint), importc: "Tox_Err_Group_Send_Message", header: "tox/tox.h".} = enum
     TOX_ERR_GROUP_SEND_MESSAGE_OK, ##
                                   ##  The group number passed did not designate a valid group.
                                   ##
@@ -4411,7 +4415,7 @@ type                          ##
 
 
 proc tox_err_group_send_message_to_string*(value: Tox_Err_Group_Send_Message): cstring {.
-    importc: "tox_err_group_send_message_to_string", header: "tox.h".}
+    importc: "tox_err_group_send_message_to_string", header: "tox/tox.h".}
 ##
 ##  Send a text chat message to the group.
 ##
@@ -4436,11 +4440,11 @@ proc tox_err_group_send_message_to_string*(value: Tox_Err_Group_Send_Message): c
 proc tox_group_send_message*(tox: ptr Tox; group_number: Tox_Group_Number;
                             message_type: Tox_Message_Type; message: ptr uint8;
                             length: csize_t; error: ptr Tox_Err_Group_Send_Message): Tox_Group_Message_Id {.
-    importc: "tox_group_send_message", header: "tox.h".}
+    importc: "tox_group_send_message", header: "tox/tox.h".}
 type                          ##
     ##  The function returned successfully.
     ##
-  Tox_Err_Group_Send_Private_Message* {.size: sizeof(cint).} = enum
+  Tox_Err_Group_Send_Private_Message* {.size: sizeof(cint), importc: "Tox_Err_Group_Send_Private_Message", header: "tox/tox.h".} = enum
     TOX_ERR_GROUP_SEND_PRIVATE_MESSAGE_OK, ##
                                           ##  The group number passed did not designate a valid group.
                                           ##
@@ -4471,7 +4475,7 @@ type                          ##
 
 proc tox_err_group_send_private_message_to_string*(
     value: Tox_Err_Group_Send_Private_Message): cstring {.
-    importc: "tox_err_group_send_private_message_to_string", header: "tox.h".}
+    importc: "tox_err_group_send_private_message_to_string", header: "tox/tox.h".}
 ##
 ##  Send a text chat message to the specified peer in the specified group.
 ##
@@ -4497,11 +4501,11 @@ proc tox_group_send_private_message*(tox: ptr Tox; group_number: Tox_Group_Numbe
                                     peer_id: Tox_Group_Peer_Number;
                                     message_type: Tox_Message_Type;
                                     message: ptr uint8; length: csize_t; error: ptr Tox_Err_Group_Send_Private_Message): Tox_Group_Message_Id {.
-    importc: "tox_group_send_private_message", header: "tox.h".}
+    importc: "tox_group_send_private_message", header: "tox/tox.h".}
 type                          ##
     ##  The function returned successfully.
     ##
-  Tox_Err_Group_Send_Custom_Packet* {.size: sizeof(cint).} = enum
+  Tox_Err_Group_Send_Custom_Packet* {.size: sizeof(cint), importc: "Tox_Err_Group_Send_Custom_Packet", header: "tox/tox.h".} = enum
     TOX_ERR_GROUP_SEND_CUSTOM_PACKET_OK, ##
                                         ##  The group number passed did not designate a valid group.
                                         ##
@@ -4527,7 +4531,7 @@ type                          ##
 
 proc tox_err_group_send_custom_packet_to_string*(
     value: Tox_Err_Group_Send_Custom_Packet): cstring {.
-    importc: "tox_err_group_send_custom_packet_to_string", header: "tox.h".}
+    importc: "tox_err_group_send_custom_packet_to_string", header: "tox/tox.h".}
 ##
 ##  Send a custom packet to the group.
 ##
@@ -4558,11 +4562,11 @@ proc tox_err_group_send_custom_packet_to_string*(
 proc tox_group_send_custom_packet*(tox: ptr Tox; group_number: Tox_Group_Number;
                                   lossless: bool; data: ptr uint8; length: csize_t;
                                   error: ptr Tox_Err_Group_Send_Custom_Packet): bool {.
-    importc: "tox_group_send_custom_packet", header: "tox.h".}
+    importc: "tox_group_send_custom_packet", header: "tox/tox.h".}
 type                          ##
     ##  The function returned successfully.
     ##
-  Tox_Err_Group_Send_Custom_Private_Packet* {.size: sizeof(cint).} = enum
+  Tox_Err_Group_Send_Custom_Private_Packet* {.size: sizeof(cint), importc: "Tox_Err_Group_Send_Custom_Private_Packet", header: "tox/tox.h".} = enum
     TOX_ERR_GROUP_SEND_CUSTOM_PRIVATE_PACKET_OK, ##
                                                 ##  The group number passed did not designate a valid group.
                                                 ##
@@ -4590,7 +4594,7 @@ type                          ##
 
 proc tox_err_group_send_custom_private_packet_to_string*(
     value: Tox_Err_Group_Send_Custom_Private_Packet): cstring {.
-    importc: "tox_err_group_send_custom_private_packet_to_string", header: "tox.h".}
+    importc: "tox_err_group_send_custom_private_packet_to_string", header: "tox/tox.h".}
 ##
 ##  Send a custom private packet to a designated peer in the group.
 ##
@@ -4623,7 +4627,7 @@ proc tox_group_send_custom_private_packet*(tox: ptr Tox;
     group_number: Tox_Group_Number; peer_id: Tox_Group_Peer_Number; lossless: bool;
     data: ptr uint8; length: csize_t;
     error: ptr Tox_Err_Group_Send_Custom_Private_Packet): bool {.
-    importc: "tox_group_send_custom_private_packet", header: "tox.h".}
+    importc: "tox_group_send_custom_private_packet", header: "tox/tox.h".}
 ## *****************************************************************************
 ##
 ##  :: Group chat message receiving
@@ -4654,7 +4658,7 @@ type
 ##
 
 proc tox_callback_group_message*(tox: ptr Tox; callback: ptr tox_group_message_cb) {.
-    importc: "tox_callback_group_message", header: "tox.h".}
+    importc: "tox_callback_group_message", header: "tox/tox.h".}
 ##
 ##  @param group_number The group number of the group the private message is
 ##    intended for.
@@ -4681,7 +4685,7 @@ type
 ##
 
 proc tox_callback_group_private_message*(tox: ptr Tox; callback: ptr tox_group_private_message_cb) {.
-    importc: "tox_callback_group_private_message", header: "tox.h".}
+    importc: "tox_callback_group_private_message", header: "tox/tox.h".}
 ##
 ##  @param group_number The group number of the group the packet is intended for.
 ##  @param peer_id The ID of the peer who sent the packet.
@@ -4703,7 +4707,7 @@ type
 
 proc tox_callback_group_custom_packet*(tox: ptr Tox;
                                       callback: ptr tox_group_custom_packet_cb) {.
-    importc: "tox_callback_group_custom_packet", header: "tox.h".}
+    importc: "tox_callback_group_custom_packet", header: "tox/tox.h".}
 ##
 ##  @param group_number The group number of the group the packet is intended for.
 ##  @param peer_id The ID of the peer who sent the packet.
@@ -4725,7 +4729,7 @@ type
 
 proc tox_callback_group_custom_private_packet*(tox: ptr Tox;
     callback: ptr tox_group_custom_private_packet_cb) {.
-    importc: "tox_callback_group_custom_private_packet", header: "tox.h".}
+    importc: "tox_callback_group_custom_private_packet", header: "tox/tox.h".}
 ## *****************************************************************************
 ##
 ##  :: Group chat inviting and join/part events
@@ -4735,7 +4739,7 @@ proc tox_callback_group_custom_private_packet*(tox: ptr Tox;
 type                          ##
     ##  The function returned successfully.
     ##
-  Tox_Err_Group_Invite_Friend* {.size: sizeof(cint).} = enum
+  Tox_Err_Group_Invite_Friend* {.size: sizeof(cint), importc: "Tox_Err_Group_Invite_Friend", header: "tox/tox.h".} = enum
     TOX_ERR_GROUP_INVITE_FRIEND_OK, ##
                                    ##  The group number passed did not designate a valid group.
                                    ##
@@ -4756,7 +4760,7 @@ type                          ##
 
 
 proc tox_err_group_invite_friend_to_string*(value: Tox_Err_Group_Invite_Friend): cstring {.
-    importc: "tox_err_group_invite_friend_to_string", header: "tox.h".}
+    importc: "tox_err_group_invite_friend_to_string", header: "tox/tox.h".}
 ##
 ##  Invite a friend to a group.
 ##
@@ -4774,11 +4778,11 @@ proc tox_err_group_invite_friend_to_string*(value: Tox_Err_Group_Invite_Friend):
 proc tox_group_invite_friend*(tox: ptr Tox; group_number: Tox_Group_Number;
                              friend_number: Tox_Friend_Number;
                              error: ptr Tox_Err_Group_Invite_Friend): bool {.
-    importc: "tox_group_invite_friend", header: "tox.h".}
+    importc: "tox_group_invite_friend", header: "tox/tox.h".}
 type                          ##
     ##  The function returned successfully.
     ##
-  Tox_Err_Group_Invite_Accept* {.size: sizeof(cint).} = enum
+  Tox_Err_Group_Invite_Accept* {.size: sizeof(cint), importc: "Tox_Err_Group_Invite_Accept", header: "tox/tox.h".} = enum
     TOX_ERR_GROUP_INVITE_ACCEPT_OK, ##
                                    ##  The invite data is not in the expected format.
                                    ##
@@ -4805,7 +4809,7 @@ type                          ##
 
 
 proc tox_err_group_invite_accept_to_string*(value: Tox_Err_Group_Invite_Accept): cstring {.
-    importc: "tox_err_group_invite_accept_to_string", header: "tox.h".}
+    importc: "tox_err_group_invite_accept_to_string", header: "tox/tox.h".}
 ##
 ##  Accept an invite to a group chat that the client previously received from a
 ##  friend. The invite is only valid while the inviter is present in the group.
@@ -4829,7 +4833,7 @@ proc tox_group_invite_accept*(tox: ptr Tox; friend_number: Tox_Friend_Number;
                              name: ptr uint8; name_length: csize_t;
                              password: ptr uint8; password_length: csize_t;
                              error: ptr Tox_Err_Group_Invite_Accept): Tox_Group_Number {.
-    importc: "tox_group_invite_accept", header: "tox.h".}
+    importc: "tox_group_invite_accept", header: "tox/tox.h".}
 ##
 ##  @param friend_number The friend number of the contact who sent the invite.
 ##  @param invite_data The invite data.
@@ -4853,7 +4857,7 @@ type
 ##
 
 proc tox_callback_group_invite*(tox: ptr Tox; callback: ptr tox_group_invite_cb) {.
-    importc: "tox_callback_group_invite", header: "tox.h".}
+    importc: "tox_callback_group_invite", header: "tox/tox.h".}
 ##
 ##  @param group_number The group number of the group in which a new peer has
 ##    joined.
@@ -4873,7 +4877,7 @@ type
 
 proc tox_callback_group_peer_join*(tox: ptr Tox;
                                   callback: ptr tox_group_peer_join_cb) {.
-    importc: "tox_callback_group_peer_join", header: "tox.h".}
+    importc: "tox_callback_group_peer_join", header: "tox/tox.h".}
 ##
 ##  Represents peer exit events. These should be used with the `group_peer_exit`
 ##  event.
@@ -4882,7 +4886,7 @@ proc tox_callback_group_peer_join*(tox: ptr Tox;
 type                          ##
     ##  The peer has quit the group.
     ##
-  Tox_Group_Exit_Type* {.size: sizeof(cint).} = enum
+  Tox_Group_Exit_Type* {.size: sizeof(cint), importc: "Tox_Group_Exit_Type", header: "tox/tox.h".} = enum
     TOX_GROUP_EXIT_TYPE_QUIT, ##
                              ##  Your connection with this peer has timed out.
                              ##
@@ -4904,7 +4908,7 @@ type                          ##
 
 
 proc tox_group_exit_type_to_string*(value: Tox_Group_Exit_Type): cstring {.
-    importc: "tox_group_exit_type_to_string", header: "tox.h".}
+    importc: "tox_group_exit_type_to_string", header: "tox/tox.h".}
 ##
 ##  @param group_number The group number of the group in which a peer has left.
 ##  @param peer_id The ID of the peer who left the group. This ID no longer
@@ -4931,7 +4935,7 @@ type
 
 proc tox_callback_group_peer_exit*(tox: ptr Tox;
                                   callback: ptr tox_group_peer_exit_cb) {.
-    importc: "tox_callback_group_peer_exit", header: "tox.h".}
+    importc: "tox_callback_group_peer_exit", header: "tox/tox.h".}
 ##
 ##  @param group_number The group number of the group that the client has joined.
 ##
@@ -4949,7 +4953,7 @@ type
 
 proc tox_callback_group_self_join*(tox: ptr Tox;
                                   callback: ptr tox_group_self_join_cb) {.
-    importc: "tox_callback_group_self_join", header: "tox.h".}
+    importc: "tox_callback_group_self_join", header: "tox/tox.h".}
 ##
 ##  Represents types of failed group join attempts. These are used in the
 ##  tox_callback_group_rejected callback when a peer fails to join a group.
@@ -4958,7 +4962,7 @@ proc tox_callback_group_self_join*(tox: ptr Tox;
 type                          ##
     ##  The group peer limit has been reached.
     ##
-  Tox_Group_Join_Fail* {.size: sizeof(cint).} = enum
+  Tox_Group_Join_Fail* {.size: sizeof(cint), importc: "Tox_Group_Join_Fail", header: "tox/tox.h".} = enum
     TOX_GROUP_JOIN_FAIL_PEER_LIMIT, ##
                                    ##  You have supplied an invalid password.
                                    ##
@@ -4970,7 +4974,7 @@ type                          ##
 
 
 proc tox_group_join_fail_to_string*(value: Tox_Group_Join_Fail): cstring {.
-    importc: "tox_group_join_fail_to_string", header: "tox.h".}
+    importc: "tox_group_join_fail_to_string", header: "tox/tox.h".}
 ##
 ##  @param group_number The group number of the group for which the join has
 ##    failed.
@@ -4989,7 +4993,7 @@ type
 
 proc tox_callback_group_join_fail*(tox: ptr Tox;
                                   callback: ptr tox_group_join_fail_cb) {.
-    importc: "tox_callback_group_join_fail", header: "tox.h".}
+    importc: "tox_callback_group_join_fail", header: "tox/tox.h".}
 ## *****************************************************************************
 ##
 ##  :: Group chat Founder controls
@@ -4999,7 +5003,7 @@ proc tox_callback_group_join_fail*(tox: ptr Tox;
 type                          ##
     ##  The function returned successfully.
     ##
-  Tox_Err_Group_Set_Password* {.size: sizeof(cint).} = enum
+  Tox_Err_Group_Set_Password* {.size: sizeof(cint), importc: "Tox_Err_Group_Set_Password", header: "tox/tox.h".} = enum
     TOX_ERR_GROUP_SET_PASSWORD_OK, ##
                                   ##  The group number passed did not designate a valid group.
                                   ##
@@ -5022,7 +5026,7 @@ type                          ##
 
 
 proc tox_err_group_set_password_to_string*(value: Tox_Err_Group_Set_Password): cstring {.
-    importc: "tox_err_group_set_password_to_string", header: "tox.h".}
+    importc: "tox_err_group_set_password_to_string", header: "tox/tox.h".}
 ##
 ##  Set or unset the group password.
 ##
@@ -5043,11 +5047,11 @@ proc tox_err_group_set_password_to_string*(value: Tox_Err_Group_Set_Password): c
 proc tox_group_set_password*(tox: ptr Tox; group_number: Tox_Group_Number;
                             password: ptr uint8; length: csize_t;
                             error: ptr Tox_Err_Group_Set_Password): bool {.
-    importc: "tox_group_set_password", header: "tox.h".}
+    importc: "tox_group_set_password", header: "tox/tox.h".}
 type                          ##
     ##  The function returned successfully.
     ##
-  Tox_Err_Group_Set_Topic_Lock* {.size: sizeof(cint).} = enum
+  Tox_Err_Group_Set_Topic_Lock* {.size: sizeof(cint), importc: "Tox_Err_Group_Set_Topic_Lock", header: "tox/tox.h".} = enum
     TOX_ERR_GROUP_SET_TOPIC_LOCK_OK, ##
                                     ##  The group number passed did not designate a valid group.
                                     ##
@@ -5071,7 +5075,7 @@ type                          ##
 
 
 proc tox_err_group_set_topic_lock_to_string*(value: Tox_Err_Group_Set_Topic_Lock): cstring {.
-    importc: "tox_err_group_set_topic_lock_to_string", header: "tox.h".}
+    importc: "tox_err_group_set_topic_lock_to_string", header: "tox/tox.h".}
 ##
 ##  Set the group topic lock state.
 ##
@@ -5093,11 +5097,11 @@ proc tox_err_group_set_topic_lock_to_string*(value: Tox_Err_Group_Set_Topic_Lock
 proc tox_group_set_topic_lock*(tox: ptr Tox; group_number: Tox_Group_Number;
                               topic_lock: Tox_Group_Topic_Lock;
                               error: ptr Tox_Err_Group_Set_Topic_Lock): bool {.
-    importc: "tox_group_set_topic_lock", header: "tox.h".}
+    importc: "tox_group_set_topic_lock", header: "tox/tox.h".}
 type                          ##
     ##  The function returned successfully.
     ##
-  Tox_Err_Group_Set_Voice_State* {.size: sizeof(cint).} = enum
+  Tox_Err_Group_Set_Voice_State* {.size: sizeof(cint), importc: "Tox_Err_Group_Set_Voice_State", header: "tox/tox.h".} = enum
     TOX_ERR_GROUP_SET_VOICE_STATE_OK, ##
                                      ##  The group number passed did not designate a valid group.
                                      ##
@@ -5120,7 +5124,7 @@ type                          ##
 
 proc tox_err_group_set_voice_state_to_string*(
     value: Tox_Err_Group_Set_Voice_State): cstring {.
-    importc: "tox_err_group_set_voice_state_to_string", header: "tox.h".}
+    importc: "tox_err_group_set_voice_state_to_string", header: "tox/tox.h".}
 ##
 ##  Set the group voice state.
 ##
@@ -5142,11 +5146,11 @@ proc tox_err_group_set_voice_state_to_string*(
 proc tox_group_set_voice_state*(tox: ptr Tox; group_number: Tox_Group_Number;
                                voice_state: Tox_Group_Voice_State;
                                error: ptr Tox_Err_Group_Set_Voice_State): bool {.
-    importc: "tox_group_set_voice_state", header: "tox.h".}
+    importc: "tox_group_set_voice_state", header: "tox/tox.h".}
 type                          ##
     ##  The function returned successfully.
     ##
-  Tox_Err_Group_Set_Privacy_State* {.size: sizeof(cint).} = enum
+  Tox_Err_Group_Set_Privacy_State* {.size: sizeof(cint), importc: "Tox_Err_Group_Set_Privacy_State", header: "tox/tox.h".} = enum
     TOX_ERR_GROUP_SET_PRIVACY_STATE_OK, ##
                                        ##  The group number passed did not designate a valid group.
                                        ##
@@ -5169,7 +5173,7 @@ type                          ##
 
 proc tox_err_group_set_privacy_state_to_string*(
     value: Tox_Err_Group_Set_Privacy_State): cstring {.
-    importc: "tox_err_group_set_privacy_state_to_string", header: "tox.h".}
+    importc: "tox_err_group_set_privacy_state_to_string", header: "tox/tox.h".}
 ##
 ##  Set the group privacy state.
 ##
@@ -5191,11 +5195,11 @@ proc tox_err_group_set_privacy_state_to_string*(
 proc tox_group_set_privacy_state*(tox: ptr Tox; group_number: Tox_Group_Number;
                                  privacy_state: Tox_Group_Privacy_State;
                                  error: ptr Tox_Err_Group_Set_Privacy_State): bool {.
-    importc: "tox_group_set_privacy_state", header: "tox.h".}
+    importc: "tox_group_set_privacy_state", header: "tox/tox.h".}
 type                          ##
     ##  The function returned successfully.
     ##
-  Tox_Err_Group_Set_Peer_Limit* {.size: sizeof(cint).} = enum
+  Tox_Err_Group_Set_Peer_Limit* {.size: sizeof(cint), importc: "Tox_Err_Group_Set_Peer_Limit", header: "tox/tox.h".} = enum
     TOX_ERR_GROUP_SET_PEER_LIMIT_OK, ##
                                     ##  The group number passed did not designate a valid group.
                                     ##
@@ -5216,7 +5220,7 @@ type                          ##
 
 
 proc tox_err_group_set_peer_limit_to_string*(value: Tox_Err_Group_Set_Peer_Limit): cstring {.
-    importc: "tox_err_group_set_peer_limit_to_string", header: "tox.h".}
+    importc: "tox_err_group_set_peer_limit_to_string", header: "tox/tox.h".}
 ##
 ##  Set the group peer limit.
 ##
@@ -5234,7 +5238,7 @@ proc tox_err_group_set_peer_limit_to_string*(value: Tox_Err_Group_Set_Peer_Limit
 proc tox_group_set_peer_limit*(tox: ptr Tox; group_number: Tox_Group_Number;
                               peer_limit: uint16;
                               error: ptr Tox_Err_Group_Set_Peer_Limit): bool {.
-    importc: "tox_group_set_peer_limit", header: "tox.h".}
+    importc: "tox_group_set_peer_limit", header: "tox/tox.h".}
 ## *****************************************************************************
 ##
 ##  :: Group chat moderation controls
@@ -5244,7 +5248,7 @@ proc tox_group_set_peer_limit*(tox: ptr Tox; group_number: Tox_Group_Number;
 type                          ##
     ##  The function returned successfully.
     ##
-  Tox_Err_Group_Set_Ignore* {.size: sizeof(cint).} = enum
+  Tox_Err_Group_Set_Ignore* {.size: sizeof(cint), importc: "Tox_Err_Group_Set_Ignore", header: "tox/tox.h".} = enum
     TOX_ERR_GROUP_SET_IGNORE_OK, ##
                                 ##  The group number passed did not designate a valid group.
                                 ##
@@ -5258,7 +5262,7 @@ type                          ##
 
 
 proc tox_err_group_set_ignore_to_string*(value: Tox_Err_Group_Set_Ignore): cstring {.
-    importc: "tox_err_group_set_ignore_to_string", header: "tox.h".}
+    importc: "tox_err_group_set_ignore_to_string", header: "tox/tox.h".}
 ##
 ##  Ignore or unignore a peer.
 ##
@@ -5273,11 +5277,11 @@ proc tox_err_group_set_ignore_to_string*(value: Tox_Err_Group_Set_Ignore): cstri
 proc tox_group_set_ignore*(tox: ptr Tox; group_number: Tox_Group_Number;
                           peer_id: Tox_Group_Peer_Number; ignore: bool;
                           error: ptr Tox_Err_Group_Set_Ignore): bool {.
-    importc: "tox_group_set_ignore", header: "tox.h".}
+    importc: "tox_group_set_ignore", header: "tox/tox.h".}
 type                          ##
     ##  The function returned successfully.
     ##
-  Tox_Err_Group_Set_Role* {.size: sizeof(cint).} = enum
+  Tox_Err_Group_Set_Role* {.size: sizeof(cint), importc: "Tox_Err_Group_Set_Role", header: "tox/tox.h".} = enum
     TOX_ERR_GROUP_SET_ROLE_OK, ##
                               ##  The group number passed did not designate a valid group.
                               ##
@@ -5303,7 +5307,7 @@ type                          ##
 
 
 proc tox_err_group_set_role_to_string*(value: Tox_Err_Group_Set_Role): cstring {.
-    importc: "tox_err_group_set_role_to_string", header: "tox.h".}
+    importc: "tox_err_group_set_role_to_string", header: "tox/tox.h".}
 ##
 ##  Set a peer's role.
 ##
@@ -5327,11 +5331,11 @@ proc tox_err_group_set_role_to_string*(value: Tox_Err_Group_Set_Role): cstring {
 proc tox_group_set_role*(tox: ptr Tox; group_number: Tox_Group_Number;
                         peer_id: Tox_Group_Peer_Number; role: Tox_Group_Role;
                         error: ptr Tox_Err_Group_Set_Role): bool {.
-    importc: "tox_group_set_role", header: "tox.h".}
+    importc: "tox_group_set_role", header: "tox/tox.h".}
 type                          ##
     ##  The function returned successfully.
     ##
-  Tox_Err_Group_Kick_Peer* {.size: sizeof(cint).} = enum
+  Tox_Err_Group_Kick_Peer* {.size: sizeof(cint), importc: "Tox_Err_Group_Kick_Peer", header: "tox/tox.h".} = enum
     TOX_ERR_GROUP_KICK_PEER_OK, ##
                                ##  The group number passed did not designate a valid group.
                                ##
@@ -5354,7 +5358,7 @@ type                          ##
 
 
 proc tox_err_group_kick_peer_to_string*(value: Tox_Err_Group_Kick_Peer): cstring {.
-    importc: "tox_err_group_kick_peer_to_string", header: "tox.h".}
+    importc: "tox_err_group_kick_peer_to_string", header: "tox/tox.h".}
 ##
 ##  Kick a peer.
 ##
@@ -5374,7 +5378,7 @@ proc tox_err_group_kick_peer_to_string*(value: Tox_Err_Group_Kick_Peer): cstring
 proc tox_group_kick_peer*(tox: ptr Tox; group_number: Tox_Group_Number;
                          peer_id: Tox_Group_Peer_Number;
                          error: ptr Tox_Err_Group_Kick_Peer): bool {.
-    importc: "tox_group_kick_peer", header: "tox.h".}
+    importc: "tox_group_kick_peer", header: "tox/tox.h".}
 ##
 ##  Represents moderation events. These should be used with the
 ##  `group_moderation` event.
@@ -5383,7 +5387,7 @@ proc tox_group_kick_peer*(tox: ptr Tox; group_number: Tox_Group_Number;
 type                          ##
     ##  A peer has been kicked from the group.
     ##
-  Tox_Group_Mod_Event* {.size: sizeof(cint).} = enum
+  Tox_Group_Mod_Event* {.size: sizeof(cint), importc: "Tox_Group_Mod_Event", header: "tox/tox.h".} = enum
     TOX_GROUP_MOD_EVENT_KICK, ##
                              ##  A peer as been given the observer role.
                              ##
@@ -5397,7 +5401,7 @@ type                          ##
 
 
 proc tox_group_mod_event_to_string*(value: Tox_Group_Mod_Event): cstring {.
-    importc: "tox_group_mod_event_to_string", header: "tox.h".}
+    importc: "tox_group_mod_event_to_string", header: "tox/tox.h".}
 ##
 ##  @param group_number The group number of the group the event is intended for.
 ##  @param source_peer_id The ID of the peer who initiated the event.
@@ -5425,7 +5429,7 @@ type
 
 proc tox_callback_group_moderation*(tox: ptr Tox;
                                    callback: ptr tox_group_moderation_cb) {.
-    importc: "tox_callback_group_moderation", header: "tox.h".}
+    importc: "tox_callback_group_moderation", header: "tox/tox.h".}
 ##  @}
 ##  @}
 
