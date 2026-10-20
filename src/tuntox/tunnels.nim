@@ -14,6 +14,8 @@ type
     friendnumber*: uint32      ## friend on the other end of the tunnel
     remoteHost*: string
     remotePort*: uint16
+    forwardId*: uint32     ## client-side id, echoed back in the ACKTUNNEL reply
+    ackPending*: bool      ## server side: connect() finished, ACK not yet sent
 
   TunnelRegistry* = ref object
     tunnels*: Table[uint16, Tunnel]
