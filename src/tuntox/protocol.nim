@@ -41,7 +41,7 @@ type
 func be16(buf: openArray[byte]; pos: int): uint16 =
   uint16(buf[pos]) shl 8 or uint16(buf[pos + 1])
 
-func be32(buf: openArray[byte]; pos: int): uint32 =
+func be32*(buf: openArray[byte]; pos: int): uint32 =
   uint32(buf[pos]) shl 24 or uint32(buf[pos + 1]) shl 16 or
     uint32(buf[pos + 2]) shl 8 or uint32(buf[pos + 3])
 

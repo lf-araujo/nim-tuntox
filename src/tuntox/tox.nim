@@ -128,6 +128,42 @@ proc sendLosslessPacket*(t: ToxInstance; friend: uint32; data: seq[byte]): bool 
   result = tox_friend_send_lossless_packet(t.raw, friend,
     if data.len > 0: unsafeAddr data[0] else: nil, csize_t data.len, addr err)
 
+proc friendAdd*(t: ToxInstance; addressHex, message: string): uint32 =
+  ## Send a friend request to a Tox ID (76 hex chars) carrying `message`
+  ## (C: tox_friend_add in client_mode). Returns the friend number.
+  if addressHex.len != TOX_ADDRESS_SIZE * 2:
+    raise newException(ToxError, "bad Tox ID length: " & $addressHex.len)
+  if message.len > TOX_MAX_FRIEND_REQUEST_LENGTH:
+    raise newException(ToxError, "friend request message too long")
+  var address: array[TOX_ADDRESS_SIZE, uint8]
+  for i in 0 ..< TOX_ADDRESS_SIZE:
+    address[i] = uint8(parseHexInt(addressHex[i * 2 ..< i * 2 + 2]))
+  var err: Tox_Err_Friend_Add
+  result = tox_friend_add(t.raw, address,
+    if message.len > 0: cast[ptr uint8](unsafeAddr message[0]) else: nil,
+    csize_t message.len, addr err)
+  if err != TOX_ERR_FRIEND_ADD_OK:
+    raise newException(ToxError, "friend_add failed: " & $err)
+
+proc friendByPublicKey*(t: ToxInstance; publicKeyHex: string): uint32 =
+  ## The friend number for an existing friend (first 64 hex chars of their
+  ## Tox ID) — used when a restart reloads an identity that already sent
+  ## the request, since re-sending would fail with ALREADY_SENT.
+  var key: array[TOX_PUBLIC_KEY_SIZE, uint8]
+  for i in 0 ..< TOX_PUBLIC_KEY_SIZE:
+    key[i] = uint8(parseHexInt(publicKeyHex[i * 2 ..< i * 2 + 2]))
+  var err: Tox_Err_Friend_By_Public_Key
+  result = tox_friend_by_public_key(t.raw, key, addr err)
+  if err != TOX_ERR_FRIEND_BY_PUBLIC_KEY_OK:
+    raise newException(ToxError, "friend_by_public_key failed: " & $err)
+
+proc friendDelete*(t: ToxInstance; friend: uint32) =
+  ## Drop a friend (C: tox_friend_delete before re-sending a request).
+  var err: Tox_Err_Friend_Delete
+  discard tox_friend_delete(t.raw, friend, addr err)
+  if err != TOX_ERR_FRIEND_DELETE_OK:
+    raise newException(ToxError, "friend_delete failed: " & $err)
+
 proc friendAddNoRequest*(t: ToxInstance; publicKeyHex: string): uint32 =
   ## Accept a friend by public key (32-byte hex); returns the friend number.
   var err: Tox_Err_Friend_Add

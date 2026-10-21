@@ -54,3 +54,18 @@ proc findForwardById*(forwards: seq[LocalForward];
   for f in forwards:
     if f.forwardId == forwardId:
       return f
+
+proc findPendingForwardById*(forwards: seq[LocalForward];
+    forwardId: uint32): LocalForward =
+  ## The forward with this id if it is still waiting for its ACKTUNNEL
+  ## (C: find_pending_forward_by_id).
+  let f = findForwardById(forwards, forwardId)
+  if f != nil and not f.isAcked:
+    result = f
+
+proc findForwardBySock*(forwards: seq[LocalForward];
+    sock: Socket): LocalForward =
+  ## The forward whose accepted socket is this one (C: find_forward_by_sock).
+  for f in forwards:
+    if f.acceptSock == sock:
+      return f
