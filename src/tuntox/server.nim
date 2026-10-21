@@ -50,6 +50,12 @@ proc saveState*(s: TunnelServer) =
   writeFile(tmp, cast[string](s.tox.savedata()))
   moveFile(tmp, path)
 
+proc bootstrap*(s: TunnelServer; host: string; port: uint16;
+    keyHex: string) =
+  ## An extra bootstrap node beyond the static list — tests point both
+  ## ends at a local DHT node for a hermetic loopback network.
+  s.tox.bootstrap(host, port, keyHex)
+
 proc toxId*(s: TunnelServer): string =
   ## The server's Tox ID (76 hex chars) — share this with clients.
   s.tox.address

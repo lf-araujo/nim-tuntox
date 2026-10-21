@@ -61,6 +61,12 @@ proc saveState*(c: TunnelClient) =
   writeFile(tmp, cast[string](c.tox.savedata()))
   moveFile(tmp, path)
 
+proc bootstrap*(c: TunnelClient; host: string; port: uint16;
+    keyHex: string) =
+  ## An extra bootstrap node beyond the static list — tests point both
+  ## ends at a local DHT node for a hermetic loopback network.
+  c.tox.bootstrap(host, port, keyHex)
+
 proc toxId*(c: TunnelClient): string =
   ## The client's own Tox ID (76 hex chars).
   c.tox.address
@@ -104,6 +110,12 @@ proc resetPendingForwards(c: TunnelClient) =
       f.acceptSock.close()
       f.acceptSock = nil
 
+func requestMessage(c: TunnelClient): string =
+  ## toxcore refuses zero-length friend-request messages, so a secretless
+  ## pairing sends a lone NUL — the server strips trailing NULs before
+  ## comparing, so both sides still see the empty secret.
+  if c.sharedSecret.len > 0: c.sharedSecret else: "\0"
+
 proc resendFriendRequest(c: TunnelClient) =
   ## C: CLIENT_STATE_CONNECTION_LOST and the 45s invitation retry — drop
   ## the dead friend entry and send a fresh request. Failures leave the
@@ -115,7 +127,7 @@ proc resendFriendRequest(c: TunnelClient) =
   except ToxError:
     discard
   try:
-    c.friendnumber = c.tox.friendAdd(c.remoteToxId, c.sharedSecret)
+    c.friendnumber = c.tox.friendAdd(c.remoteToxId, requestMessage(c))
   except ToxError:
     discard
   c.invitationSent = getTime()
@@ -220,8 +232,11 @@ proc poll*(c: TunnelClient) =
     let f = c.forwardByBindFd(ev.fd)
     if f != nil:
       # local listener ready — accept one connection and request a tunnel
-      # (C: one pending tunnel per forward at a time)
-      if f.acceptSock == nil:
+      # (C: one pending tunnel per forward at a time). The listener binds
+      # before the friend is connected, so a peer that connects early sits
+      # in the kernel backlog until the connection is up — accepting now
+      # would send REQUESTTUNNEL into the void and wedge the forward.
+      if f.acceptSock == nil and c.friendConnected:
         var peer: Socket
         f.bindSock.accept(peer)
         peer.getFd().setBlocking(false)
@@ -277,7 +292,7 @@ proc newTunnelClient*(stateDir, sharedSecret, remoteToxId: string): TunnelClient
   # befriend the server; on a restart the friend is already in our list,
   # so the request fails with ALREADY_SENT and we look the number up
   try:
-    c.friendnumber = c.tox.friendAdd(remoteToxId, sharedSecret)
+    c.friendnumber = c.tox.friendAdd(remoteToxId, requestMessage(c))
   except ToxError:
     c.friendnumber = c.tox.friendByPublicKey(remoteToxId[0 ..< 64])
   c.tox.onFriendConnection = proc (friendNumber: uint32;

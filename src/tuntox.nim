@@ -24,8 +24,9 @@
 import tuntox/[client, server, tunnels]
 
 export client.TunnelClient, client.newTunnelClient, client.addForward,
-  client.poll, client.iterationInterval, client.toxId, client.saveState
+  client.poll, client.iterationInterval, client.toxId, client.saveState,
+  client.bootstrap
 export server.TunnelServer, server.newTunnelServer, server.toxId,
   server.poll, server.iterationInterval, server.acceptFriend,
-  server.saveState
+  server.saveState, server.bootstrap
 export tunnels.LocalForward
