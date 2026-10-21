@@ -3,3 +3,4 @@ vendor/
 tests/test_identity
 tests/test_protocol
 tests/test_server
+tests/test_client
