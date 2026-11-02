@@ -88,7 +88,7 @@ proc closeTunnel(c: TunnelClient; tun: Tunnel) =
   ## C loses that link and never clears is_acked, which would wedge the
   ## forward after its first tunnel.
   let forward = findForwardBySock(c.forwards, tun.sock)
-  c.selector.unregister(tun.sock.getFd().int)
+  c.selector.unregister(tun.sock.getFd())
   tun.sock.close()
   c.tunnels.remove(tun.connId)
   if forward != nil:
@@ -146,7 +146,7 @@ proc handleAckTunnel*(c: TunnelClient; f: Frame) =
   let tun = Tunnel(connId: f.connId, sock: forward.acceptSock,
     friendnumber: f.friendnumber, forwardId: forward.forwardId)
   c.tunnels.add(tun)
-  c.selector.registerHandle(tun.sock.getFd().int, {Read},
+  c.selector.registerHandle(tun.sock.getFd(), {Read},
     uint32(tun.connId))
 
 proc handleDenyTunnel*(c: TunnelClient; f: Frame) =
@@ -216,7 +216,7 @@ proc addForward*(c: TunnelClient; localPort: int; remoteHost: string;
     forwardId: c.freshForwardId(),
     created: getTime(),
   )
-  c.selector.registerHandle(bindSock.getFd().int, {Read}, result.forwardId)
+  c.selector.registerHandle(bindSock.getFd(), {Read}, result.forwardId)
   c.forwards.add(result)
 
 proc poll*(c: TunnelClient) =

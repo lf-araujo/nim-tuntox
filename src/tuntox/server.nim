@@ -5,7 +5,12 @@
 ## host editor can call it from its own tick.
 
 import std/[net, nativesockets, os, random, selectors, strutils, tables]
-from std/posix import EINPROGRESS, EWOULDBLOCK
+when defined(windows):
+  from std/winlean import WSAEWOULDBLOCK
+  const EINPROGRESS = WSAEWOULDBLOCK  # winsock reports a pending connect so
+  const EWOULDBLOCK = WSAEWOULDBLOCK
+else:
+  from std/posix import EINPROGRESS, EWOULDBLOCK
 import bootstrap, protocol, tox, tunnels
 
 type
@@ -72,7 +77,7 @@ proc acceptFriend*(s: TunnelServer; publicKeyHex, message: string): bool =
     result = false
 
 proc dropTunnel(s: TunnelServer; tun: Tunnel) =
-  s.selector.unregister(tun.sock.getFd().int)
+  s.selector.unregister(tun.sock.getFd())
   tun.sock.close()
   s.tunnels.remove(tun.connId)
 
@@ -102,7 +107,7 @@ proc handleRequestTunnel*(s: TunnelServer; f: Frame) =
   s.tunnels.add(Tunnel(connId: connId, sock: sock,
     friendnumber: f.friendnumber, remoteHost: req.host,
     remotePort: req.port, forwardId: req.forwardId, ackPending: true))
-  s.selector.registerHandle(sock.getFd().int, {Read, Write}, connId)
+  s.selector.registerHandle(sock.getFd(), {Read, Write}, connId)
 
 proc handleTcpFrame*(s: TunnelServer; f: Frame) =
   ## C: handle_client_tcp_frame — write the payload to the forwarded host.
@@ -146,7 +151,7 @@ proc poll*(s: TunnelServer) =
       if getSockOptInt(tun.sock.getFd(), SOL_SOCKET, SO_ERROR) == 0:
         tun.ackPending = false
         tun.sock.getFd().setBlocking(true)
-        s.selector.updateHandle(ev.fd, {Read})
+        s.selector.updateHandle(tun.sock.getFd(), {Read})
         discard s.sendFrame(Frame(friendnumber: tun.friendnumber,
           packetType: packetTypeAckTunnel, connId: tun.connId,
           data: forwardIdData(tun.forwardId)))
