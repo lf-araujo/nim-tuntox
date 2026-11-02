@@ -1,11 +1,12 @@
 ## c2nim-generated raw binding to libtoxcore (tox.h, c-toxcore v0.2.19).
+import std/strutils  # strip: pkg-config output ends in \r\n on Windows
 ## Mechanical translation; the curated API lives in tox.nim.
-{.passC: staticExec("pkg-config --cflags toxcore").}
+{.passC: staticExec("pkg-config --cflags toxcore").strip.}
 ## tox.h const-qualifies callback params (const uint8_t *); Nim cannot
 ## express const pointers, and gcc >= 14 makes the mismatch a hard error.
 ## Our trampolines never write through them, so keep it a warning.
 {.passC: "-Wno-error=incompatible-pointer-types".}
-{.passL: staticExec("pkg-config --static --libs toxcore").}
+{.passL: staticExec("pkg-config --static --libs toxcore").strip.}
 when defined(windows):
   ## A static toxcore's toxcore.pc does not name the Windows system libraries
   ## it calls (sockets, adapter enumeration for LAN discovery); after it here.
