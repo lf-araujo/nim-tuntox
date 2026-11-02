@@ -6,6 +6,10 @@
 ## Our trampolines never write through them, so keep it a warning.
 {.passC: "-Wno-error=incompatible-pointer-types".}
 {.passL: staticExec("pkg-config --static --libs toxcore").}
+when defined(windows):
+  ## A static toxcore's toxcore.pc does not name the Windows system libraries
+  ## it calls (sockets, adapter enumeration for LAN discovery); after it here.
+  {.passL: "-lws2_32 -liphlpapi".}
 
 type
   Tox* {.importc: "Tox", header: "tox/tox.h", incompleteStruct.} = object
