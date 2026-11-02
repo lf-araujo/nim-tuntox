@@ -142,7 +142,9 @@ proc poll*(s: TunnelServer) =
   ## One iteration: tox_iterate, then every ready tunnel socket. Call this
   ## every `iterationInterval` milliseconds from the host's event loop.
   s.tox.iterate()
-  for ev in s.selector.select(0):
+  # winsock's select() rejects an empty fd set (WSAEINVAL): nothing to wait on
+  let ready = if s.selector.isEmpty: newSeq[ReadyKey]() else: s.selector.select(0)
+  for ev in ready:
     let tun = s.tunnels.get(s.selector.getData(ev.fd))
     if tun == nil:
       continue

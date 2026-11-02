@@ -228,7 +228,9 @@ proc poll*(c: TunnelClient) =
         initDuration(seconds = invitationRetrySeconds)):
     c.reconnectNeeded = false
     c.resendFriendRequest()
-  for ev in c.selector.select(0):
+  # winsock's select() rejects an empty fd set (WSAEINVAL): nothing to wait on
+  let ready = if c.selector.isEmpty: newSeq[ReadyKey]() else: c.selector.select(0)
+  for ev in ready:
     let f = c.forwardByBindFd(ev.fd)
     if f != nil:
       # local listener ready — accept one connection and request a tunnel
