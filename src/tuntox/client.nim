@@ -67,6 +67,11 @@ proc bootstrap*(c: TunnelClient; host: string; port: uint16;
   ## ends at a local DHT node for a hermetic loopback network.
   c.tox.bootstrap(host, port, keyHex)
 
+proc networkConnected*(c: TunnelClient): bool =
+  ## Whether the client has reached the Tox network at all (see
+  ## `selfConnected`); the friend link to the server can only form after.
+  c.tox.selfConnected
+
 proc toxId*(c: TunnelClient): string =
   ## The client's own Tox ID (76 hex chars).
   c.tox.address

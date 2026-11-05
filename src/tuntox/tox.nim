@@ -119,6 +119,13 @@ proc iterate*(t: ToxInstance) =
   ## One iteration; callbacks fire synchronously with `t` as user_data.
   tox_iterate(t.raw, cast[pointer](t))
 
+proc selfConnected*(t: ToxInstance): bool =
+  ## Whether this instance is on the Tox network (DHT, over UDP or a TCP
+  ## relay). False while bootstrapping -- and for good when a firewall
+  ## drops Tox traffic, which is how a caller tells "can't reach the
+  ## network" apart from "the peer is not answering".
+  tox_self_get_connection_status(t.raw) != TOX_CONNECTION_NONE
+
 proc iterationInterval*(t: ToxInstance): int =
   ## Milliseconds the caller may sleep before the next iterate.
   tox_iteration_interval(t.raw).int
